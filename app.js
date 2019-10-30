@@ -13,43 +13,44 @@ mongoose.set('useFindAndModify', false);
 var Schema = mongoose.Schema;
 var ObjectId = mongoose.Schema.Types.ObjectId;
 
-var charity = {
-	name: String,
-	need: [ String ],
-	listOfResources: [ resource ],
-	location: String,
-	description: String,
-	photo: String,
-	transactionHistory: [ transaction ],
-	preferredDonors: [ donor ]
-};
+// var charity = {
+// 	name: String,
+// 	need: [ String ],
+// 	listOfResources: [ resource ],
+// 	location: String,
+// 	description: String,
+// 	photo: String,
+// 	transactionHistory: [ transaction ],
+// 	preferredDonors: [ donor ]
+// };
 
-var donor = {
-	name: String,
-	location: String,
-	preferredCategory: String,
-	transactionHistory: [ transaction ],
-	photo: String,
-	description: String,
-	excessResources: [ resource ],
-	friends: [ donor ],
-	preferredCharities: [ charity ]
-};
+// var donor = {
+// 	name: String,
+// 	location: String,
+// 	preferredCategory: String,
+// 	transactionHistory: [ transaction ],
+// 	photo: String,
+// 	description: String,
+// 	excessResources: [ resource ],
+// 	friends: [ donor ],
+// 	preferredCharities: [ charity ]
+// };
 
-var resource = {
-	name: String,
-	category: String,
-	description: String,
-	status: String,
-	photo: String,
-	promoted: Boolean
-};
+// var resource = {
+// 	name: String,
+// 	count: Number,
+// 	category: String,
+// 	description: String,
+// 	status: String,
+// 	photo: String,
+// 	promoted: Boolean
+// };
 
-var transaction = {
-	from: String,
-	to: String,
-	resource: String
-};
+// var transaction = {
+// 	from: String,
+// 	to: String,
+// 	resource: String
+// };
 
 var charitySchema = new Schema({
 	name: String,
@@ -64,6 +65,7 @@ var charitySchema = new Schema({
 
 var resourceSchema = new Schema({
 	name: String,
+	count: Number,
 	category: String,
 	description: String,
 	status: String,
@@ -105,8 +107,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.set('view engine', 'ejs');
 app.use(express.static(__dirname + '/public'));
 
+var charityOneId;
 //Testing simple data
-const sampleCharity = new CharityModel({
+const charityOne = new CharityModel({
 	name: 'McCharity Charity',
 	need: [ 'Wood', 'Iron' ],
 	listOfResources: [],
@@ -115,13 +118,157 @@ const sampleCharity = new CharityModel({
 	photo: '',
 	transactionHistory: [],
 	preferredDonors: []
+}).save((err, object) => {
+	charityOneId = object._id;
 });
 
-sampleCharity.save();
+var charityTwoId;
+const charityTwo = new CharityModel({
+	name: 'Damn',
+	need: [ 'Blanket', 'Food' ],
+	listOfResources: [],
+	location: 'Midway Islands',
+	description: 'nah, there is no description',
+	photo: '',
+	transactionHistory: [],
+	preferredDonors: []
+}).save((err, obj) => {
+	charityTwoId = obj._id;
+});
+
+const donorOne = new DonorModel({
+	name: 'Joe Schmoe',
+	location: 'Philadelphia',
+	preferredCategory: 'Furniture',
+	transactionHistory: [],
+	photo: '',
+	description: 'Sells furniture',
+	excessResources: [],
+	friends: [],
+	preferredCharities: []
+});
+
+var donorOneId;
+donorOne.save((err, obj) => {
+	donorOneId = obj._id;
+});
+
+const donorTwo = new DonorModel({
+	name: 'Jules Saladana',
+	location: 'New York',
+	preferredCategory: 'Electronics',
+	transactionHistory: [],
+	photo: '',
+	description: 'Fixes electronics',
+	excessResources: [],
+	friends: [],
+	preferredCharities: []
+});
+
+var donorTwoId;
+donorTwo.save((err, obj) => {
+	donorTwoId = obj._id;
+});
+
+const resourceOne = new ResourceModel({
+	name: 'Blankets',
+	count: 10,
+	category: 'Essentials',
+	description: 'Non threadbare blankets',
+	status: 'Delivered',
+	photo: '',
+	promoted: false
+});
+var resourceOneId;
+resourceOne.save((err, obj) => {
+	resourceOneId = obj._id;
+});
+
+const resourceTwo = new ResourceModel({
+	name: 'Pants',
+	count: 3,
+	category: 'Clothing',
+	description: 'Denim Pants',
+	status: 'Promised',
+	photo: '',
+	promoted: true
+});
+var resourceTwoId;
+resourceTwo.save((err, obj) => {
+	resourceTwoId = obj._id;
+});
+
+const transactionOne = new TransactionModel({
+	from: donorOneId,
+	to: charityOneId,
+	resource: resourceOneId
+});
+var transactionOneId;
+transactionOne.save((err, obj) => {
+	transactionOneId = obj._id;
+});
+
+const transactionTwo = new TransactionModel({
+	from: donorTwoId,
+	to: charityOneId,
+	resource: resourceOneId
+});
+var transactionTwoId;
+transactionTwo.save((err, obj) => {
+	transactionTwoId = obj._id;
+});
+
+const transactionThree = new TransactionModel({
+	from: donorOneId,
+	to: charityOneId,
+	resource: resourceTwoId
+});
+var transactionThreeId;
+transactionThree.save((err, obj) => {
+	transactionThreeId = obj._id;
+});
 
 //Routes
 
 app.get('/', (req, res) => {
+	console.error('transactionOneId', transactionOneId);
+	console.error('transactionTwoId', transactionTwoId);
+	console.error('transactionThreeId', transactionThreeId);
+
+	console.error('charityOneId', charityOneId);
+	CharityModel.findOneAndUpdate(
+		{ _id: charityOneId },
+		{ $push: { transactionHistory: transactionOneId } },
+		(error, success) => {
+			if (error) {
+				console.log(error);
+			} else {
+				console.log(success);
+			}
+		}
+	);
+
+	CharityModel.findByIdAndUpdate(
+		charityOneId,
+		{ $push: { transactionHistory: transactionTwoId } },
+		{ new: true },
+		(err, result) => {
+			if (err) {
+				console.err('Error! ', err);
+			}
+		}
+	);
+
+	CharityModel.findByIdAndUpdate(
+		charityOneId,
+		{ $push: { transactionHistory: transactionThreeId } },
+		{ new: true },
+		(err, result) => {
+			if (err) {
+				console.err('Error! ', err);
+			}
+		}
+	);
 	res.render('allCharities');
 });
 
@@ -132,8 +279,22 @@ app.post('/requestTransactionHistory', (req, res) => {
 		if (err) {
 			console.error(err);
 		}
-		console.log(obj);
-		console.log('Processing ' + obj.name);
-		res.send('Processing ' + obj.name);
+		// console.log(obj);
+		var arrayOfTransaction = getTransfersFromId(obj.transactionHistory);
+		console.log('arrayOfTransaction', arrayOfTransaction);
+		res.render('singleCharityView', { input: { name: obj.name, transactions: arrayOfTransaction } });
 	});
 });
+
+function getTransfersFromId(arrayOfId) {
+	var returnableArray = [];
+	arrayOfId.forEach((el) => {
+		TransactionModel.findById(el, (err, obj) => {
+			if (err) {
+				console.log('Error! ', err);
+			}
+			returnableArray.push(obj);
+		});
+	});
+	return returnableArray;
+}
