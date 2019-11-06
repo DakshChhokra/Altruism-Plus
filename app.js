@@ -2,6 +2,8 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const sampleEmail = 'dakshc@seas.upenn.edu';
+const samplePassword = 'password';
 
 const mongooseConfig = { useUnifiedTopology: true, useNewUrlParser: true, useCreateIndex: true };
 
@@ -282,7 +284,31 @@ app.get('/adminView', (req, res) => {
 });
 
 app.post('/adminViewProcessing', (req, res) => {
-	res.send(req.body);
+	if (req.body.email == sampleEmail && req.body.password == samplePassword) {
+		if (req.body.TypeOfData == 'Charities') {
+			CharityModel.findOne({ name: req.body.inputData }, (err, document) => {
+				if (err) return console.log(err);
+				document.remove();
+				res.send(`Record with name ${req.body.inputData} is found and has been deleted`);
+			});
+		} else if (req.body.TypeOfData == 'Donors') {
+			DonorModel.findOne({ name: req.body.inputData }, (err, document) => {
+				if (err) return console.log(err);
+				document.remove();
+				res.send(`Record with name ${req.body.inputData} is found and has been deleted`);
+			});
+		} else if (req.body.TypeOfData == 'Resources') {
+			ResourceModel.findOne({ name: req.body.inputData }, (err, document) => {
+				if (err) return console.log(err);
+				document.remove();
+				res.send(`Record with name ${req.body.inputData} is found and has been deleted`);
+			});
+		} else {
+			res.send('Sorry, Transactions cannot be altered.');
+		}
+	} else {
+		res.send('Sorry! Incorrect Credentials. Please go back and try again');
+	}
 });
 
 function getAllCharities() {
