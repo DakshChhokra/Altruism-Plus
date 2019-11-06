@@ -1,0 +1,23 @@
+{
+  "name": "cis350-project",
+  "version": "1.0.0",
+  "description": "CIS350 Final Project",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "CIS",
+    "350"
+  ],
+  "author": "Arthur",
+  "license": "ISC",
+  "dependencies": {
+    "async": "^3.1.0",
+    "bcrypt": "^3.0.6",
+    "body-parser": "^1.19.0",
+    "ejs": "^2.7.1",
+    "express": "^4.17.1",
+    "mongodb": "^3.3.3"
+  }
+}
