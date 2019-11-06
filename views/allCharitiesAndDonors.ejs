@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title><%= input.name%></title>
+    <title>All Users and Charities on the Platform</title>
     <style>
             .jumbotron{
                 margin: 20px 10px;
@@ -16,11 +16,20 @@
             <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">    
 </head>
 <body>
-    <h1>This is the transaction history for <%= input.name%></h1>
+    <h1>All Charities on the Platform</h1>
     <ol>
-    <% input.transactionHistory.forEach(function (el) { %>
-        <li> There was a transaction from <%= el.from %> to <%= el.to %> of <%= el.resource %> at <%= el.timeStamp %></li>
-    <%})%>
-</li>
+        <% input.charities.forEach(function (el) { %>
+            <% string = "/transactionHistoryFromAll?type=charity&charityName=" + el.name %>
+            <li> <a href="<%=string%>"> <%= el.name %> </a></li>
+        <% }) %>
+    </ol>
+    
+    <h1>All Donors on the Platform</h1>
+    <ol>
+        <% input.donors.forEach(function (el) { %>
+            <% string = "/transactionHistoryFromAll?type=donor&donorName=" + el.name %>
+            <li> <a href="<%=string%>"> <%= el.name %> </a></li>
+        <% }) %>
+    </ol>   
 </body>
 </html>
