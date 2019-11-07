@@ -36,8 +36,8 @@ var user_lookup = function(username, route_callback) {
         route_callback(null, "Lookup error: " +err);
       } else {
         if (route_callback) {
-          console.log(res.name);
-          console.log(res.password);
+          //console.log(res.name);
+          //console.log(res.password);
           route_callback(res, null);
         }
       }
