@@ -1,14 +1,18 @@
 {
-  "name": "app.js",
+  "name": "cis-350-fresh",
   "version": "1.0.0",
+  "description": "",
   "main": "app.js",
-  "repository": "https://github.com/cis-upenn/350F19-11.git",
-  "author": "DakshChhokra <chhokradaksh@gmail.com>",
-  "license": "MIT",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
   "dependencies": {
     "body-parser": "^1.19.0",
-    "ejs": "^2.7.1",
+    "ejs": "^2.7.3",
     "express": "^4.17.1",
-    "mongoose": "^5.7.7"
+    "mongoose": "^5.7.11",
+    "nodemon": "^1.19.4"
   }
 }
