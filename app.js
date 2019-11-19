@@ -307,7 +307,7 @@ app.post('/adminViewProcessing', (req, res) => {
 			res.send('Sorry, Transactions cannot be altered.');
 		}
 	} else {
-		res.send('Sorry! Incorrect Credentials. Please go back and try again');
+		res.send('Sorry! Incorrect Credentials! Please go back and try again');
 	}
 });
 
