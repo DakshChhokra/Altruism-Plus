@@ -14,12 +14,12 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(bodyParser.json());
 
-
 app.get('/', routes.get_login);
 app.get('/signup', routes.get_signup);
 app.get('/clear', routes.clear);
 app.post('/createaccount', routes.create_account);
 app.post('/checklogin', routes.check_login);
+app.post('/createevent', routes.create_event);
 
 server = app.listen(port);
 console.log(`Server running at http://${hostname}:${port}/`);

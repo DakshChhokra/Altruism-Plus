@@ -45,15 +45,46 @@ var user_lookup = function(username, route_callback) {
     });
 }
 
-
 var user_clear = function() {
     db.collection("users").drop();
+}
+
+var event_put = function(username, hash, route_callback) {
+  console.log("Putting: " + username);
+  var userObj = { name: username, password: hash};
+    db.collection("events").insertOne(userObj, function(err, res) {
+      if (err) {
+        route_callback(null, "Lookup error: " +err);
+      } else {
+        if (route_callback) {
+          console.log(route_callback);
+          route_callback(res, null);
+        }
+      }
+      console.log("1 event inserted");
+    });
+}
+
+var event_lookup = function(eventName, route_callback) {
+  console.log("Looking Up: " + eventName);
+  db.collection("events").findOne({name: eventName}, function(err, res) {
+      if (err) {
+        route_callback(null, "Lookup error: " +err);
+      } else {
+        if (route_callback) {
+          route_callback(res, null);
+        }
+      }
+      console.log("event lookup");
+    });
 }
 
 var database = {
   userPut: user_put,
   userClear: user_clear,
   userLookup: user_lookup,
+  eventPut: event_put,
+  eventLookup: event_lookup,
 };
 
 module.exports = database;

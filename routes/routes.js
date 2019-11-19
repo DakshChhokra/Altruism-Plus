@@ -5,7 +5,6 @@ var db = require('../models/database.js');
 const saltRounds = 10; // constant needed for bcrypt hash
 
 var getLogin = function(req, res) {
-    //req.session.user = null;
     var errString = req.query.error;
     res.render('login.ejs', {loginError: errString});
 };
@@ -45,7 +44,7 @@ var createAccount = function (req, res) {
                             res.redirect("/signup/?error=" +signUpError);
                         }
                         else {
-                            //res.session.user = username; // to allow current use to enter homepage
+                            res.session.user = username; // to allow current use to enter homepage
                             res.render('home.ejs');
                                                     //res.redirect("/homepage");
                         }
@@ -103,6 +102,40 @@ var checkLogin = function(req, res) {
     }
 }
 
+var createEvent = function (req, res) {
+    var eventName = req.body.eventName;
+    var eventDescription = req.body.eventDescription;
+    if (!eventName || !eventDescription || eventName === "" || eventDescription === "" ) { // throw error if any field is blank
+        var signUpErr = encodeURIComponent("One or more fields left blank.");
+        res.redirect("/signup/?error=" + signUpErr);
+        return;
+    }
+
+    db.eventLookup(eventName, function(data1, err) {
+        if (err) {
+            var signUpErr = encodeURIComponent("Error Creating Event. Please try again.");
+            res.redirect("/signup/?error=" + signUpErr);
+        } // user already exists in database
+        else if (data1) {
+            var evExists = encodeURIComponent("Username " + data1.eventName +" already exists.");
+            res.redirect("/signup/?error=" +evExists);
+        }
+        else {
+            db.eventPut(eventName, eventDescription, function(data, err) {
+                if (err) {
+                    var signUpError = encodeURIComponent("Signup error. Please try again.");
+                    res.redirect("/signup/?error=" + signUpError);
+                }
+                else {
+                    res.render('home.ejs');
+                }
+            });
+        }
+      });
+}
+
+
+
 
 var routes = {
     get_login: getLogin,
@@ -110,6 +143,7 @@ var routes = {
     create_account: createAccount,
     check_login: checkLogin,
     clear: clear,
+    create_event: createEvent,
 }
 
 module.exports = routes;
