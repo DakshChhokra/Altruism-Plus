@@ -1,14 +1,11 @@
-<<<<<<< HEAD
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 const sampleEmail = 'dakshc@seas.upenn.edu';
 const samplePassword = 'password';
-const models = require('./models/database.js'); 
+const models = require('./models/database.js');
 var routes = require('./routes/routes.js');
-
-
-
+const session = require('express-session');
 
 var port = process.env.PORT || 80;
 var server = app.listen(port, () => {
@@ -18,10 +15,17 @@ var server = app.listen(port, () => {
 //Use Object Id - instead of
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(
+	session({
+		secret: 'shhhhhhh',
+		proxy: true,
+		resave: true,
+		saveUnintialized: true
+	})
+);
 
 app.set('view engine', 'ejs');
 app.use(express.static(__dirname + '/public'));
-
 
 //Routes
 
@@ -45,10 +49,3 @@ app.get('/clear', routes.clear);
 app.post('/createaccount', routes.create_account);
 app.post('/checklogin', routes.check_login);
 app.post('/createevent', routes.create_event);
-
-
-
-
-
-
-
