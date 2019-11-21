@@ -1,0 +1,21 @@
+{
+	"name": "cis-350-fresh",
+	"version": "1.0.0",
+	"description": "",
+	"main": "app.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"async": "^3.1.0",
+		"bcrypt": "^3.0.7",
+		"body-parser": "^1.19.0",
+		"ejs": "^2.7.3",
+		"express": "^4.17.1",
+		"express-session": "^1.17.0",
+		"mongoose": "^5.7.12",
+		"nodemon": "^1.19.4"
+	}
+}
