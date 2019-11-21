@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+            .jumbotron{
+                margin: 20px 10px;
+            }
+            form{
+                margin: 20px 20px;
+            }
+        </style>
+            <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">    
+</head>
+<body>
+    <h1>Welcome to the admin view</h1>
+    <h3>Please choose one of the following categories to delete from and enter your credentials</h3>
+    <div class="container-fluid">
+            <form action="/adminViewProcessing" method="POST">
+                <div class="form-group row">
+                  <label for="email" class="col-sm-2 col-form-label">Email</label>
+                  <input type="email" class="form-group" id="email"  name="email" placeholder="Email">
+                </div>
+                <div class="form-group row">
+                  <label for="inputPassword3" class="col-sm-2 col-form-label">Password</label>
+                  <input type="password" class="form-group" id="password" name="password" placeholder="Password">
+                </div>
+                <div class="form-group row">
+                    <label for="inputData" class="col-sm-2 col-form-label">Name of Data Instance</label>
+                    <input type="text"" class="form-group" id="inputData" name="inputData" placeholder="McCharity Charity">
+                </div>
+    
+                <fieldset class="form-group row">
+                  <div class="row">
+                    <legend class="col-form-label col-sm-2 pt-0">Radios</legend>
+                    <div class="col-sm-10">
+                      <div class="form-check">
+                        <input class="form-check-input" type="radio" name="TypeOfData" id="gridRadios1" value="Charities" checked>
+                        <label class="form-check-label" for="gridRadios1">
+                          Charities
+                        </label>
+                      </div>
+                      <div class="form-check">
+                        <input class="form-check-input" type="radio" name="TypeOfData" id="gridRadios2" value="Users">
+                        <label class="form-check-label" for="gridRadios2">
+                          Donors
+                        </label>
+                      </div>
+                      <div class="form-check">
+                            <input class="form-check-input" type="radio" name="TypeOfData" id="gridRadios2" value="Resources">
+                            <label class="form-check-label" for="gridRadios2">
+                              Resources
+                            </label>
+                          </div>
+                      <div class="form-check disabled">
+                        <input class="form-check-input" type="radio" name="TypeOfData" id="gridRadios3" value="Transactions" disabled>
+                        <label class="form-check-label" for="gridRadios3">
+                          Transactions
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </fieldset>
+    
+                <button id="button" class="btn btn-primary">Remove</button>
+            </form>
+    </div>
+</body>
+</html>

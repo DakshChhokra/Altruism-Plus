@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Home</title>
+    <style>
+        .jumbotron{
+            margin: 20px 10px;
+        }
+        form{
+            margin: 20px 20px;
+        }
+    </style>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">    
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="jumbotron">
+            <h1 class="text-success">Welcome to the BRIDGING Social Venture</h1>
+        </div>
+    
+        <form action="/requestTransactionHistoryCharity" method="POST">
+            <div class="form-group">
+                <label for="charityName">Enter the name of the charity</label>
+                <input type="text" class="form-control" id="charityName" name="charityName" placeholder="XYZ Charity">
+            </div>
+            <button id="button" class="btn btn-primary">View Transaction History</button>
+        </form>
+
+        <form action="/requestTransactionHistoryDonor" method="POST">
+            <div class="form-group">
+                <label for="donorName">Enter the name of the Donor</label>
+                <input type="text" class="form-control" id="donorName" name="donorName" placeholder="XYZ Donor">
+            </div>
+            <button id="button" class="btn btn-primary">View Transaction History</button>
+        </form>
+
+        <form action="/allDonorsAndCharities" method="POST">
+            <button id="button" class="btn btn-primary">View all Donors and Charities</button>
+        </form>
+
+        <form action="/adminView" method="GET">
+            <button id="button" class="btn btn-primary">Enter Admin View</button>
+        </form>
+
+    </div>
+</body>
+</html>
