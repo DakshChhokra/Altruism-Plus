@@ -2,6 +2,7 @@ const db = require('../models/database.js');
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
+var bcrypt = require('bcrypt');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
