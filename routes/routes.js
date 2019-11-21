@@ -1,46 +1,52 @@
-const models = require('../models/database.js'); 
+const models = require('../models/database.js');
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
+var async = require('async');
+var bcrypt = require('bcrypt');
+var db = require('../models/database.js');
+
+const saltRounds = 10; // constant needed for bcrypt hash
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.set('view engine', 'ejs');
 app.use(express.static(__dirname + '/public'));
 
-var getHome = function (req, res) {
-    // initiateDB();
-    // testingUpdates(res);
-    res.render('home');
+var getHome = function(req, res) {
+	// initiateDB();
+	// testingUpdates(res);
+	res.render('home1');
 };
 
-var postRequestTransactionHistoryCharity = function (req, res) {
-    var charityName = req.body.charityName;
+var postRequestTransactionHistoryCharity = function(req, res) {
+	var charityName = req.body.charityName;
 	printCharities(charityName, res);
 };
 
-var postRequestTransactionHistoryDonor = function (req, res) {
-    var donorName = req.body.donorName;
+var postRequestTransactionHistoryDonor = function(req, res) {
+	var donorName = req.body.donorName;
 	printDonor(donorName, res);
 };
 
-var postAllDonorsAndCharities = function (req, res) {
-    getAllCharitiesAndDonors(res);
+var postAllDonorsAndCharities = function(req, res) {
+	getAllCharitiesAndDonors(res);
 };
 
-var getTransactionHistoryFromAll = function (req, res) {
-    if (req.query.type == 'charity') {
+var getTransactionHistoryFromAll = function(req, res) {
+	if (req.query.type == 'charity') {
 		printCharities(req.query.charityName, res);
 	} else {
 		printDonor(req.query.donorName, res);
 	}
 };
 
-var getAdminView = function (req, res) {
-    res.render('adminView');
+var getAdminView = function(req, res) {
+	res.render('adminView');
 };
-var postAdminViewProcessing = function (req, res) {
-    if (req.body.email == sampleEmail && req.body.password == samplePassword) {
+var postAdminViewProcessing = function(req, res) {
+	if (req.body.email == sampleEmail && req.body.password == samplePassword) {
 		if (req.body.TypeOfData == 'Charities') {
 			models.CharityModel.findOne({ name: req.body.inputData }, (err, document) => {
 				if (err) return console.log(err);
@@ -65,7 +71,7 @@ var postAdminViewProcessing = function (req, res) {
 	} else {
 		res.send('Sorry! Incorrect Credentials. Please go back and try again');
 	}
-}
+};
 
 function getAllCharities() {
 	return models.CharityModel.find().exec();
@@ -91,11 +97,15 @@ function transactionForDonor(donorName) {
 }
 
 function updateTransactionHistoryForCharity(charityID, transactionID) {
-	models.CharityModel.findByIdAndUpdate(charityID, { $push: { transactionHistory: transactionID } }, { new: true }).exec();
+	models.CharityModel
+		.findByIdAndUpdate(charityID, { $push: { transactionHistory: transactionID } }, { new: true })
+		.exec();
 }
 
 function updateTransactionHistoryForDonor(donorID, transactionID) {
-	models.DonorModel.findByIdAndUpdate(donorID, { $push: { transactionHistory: transactionID } }, { new: true }).exec();
+	models.DonorModel
+		.findByIdAndUpdate(donorID, { $push: { transactionHistory: transactionID } }, { new: true })
+		.exec();
 }
 
 async function testingUpdates(res) {
@@ -280,15 +290,148 @@ function initiateDB() {
 	});
 }
 
+var getLogin = function(req, res) {
+	req.session.user = null;
+	var errString = req.query.error;
+	res.render('login.ejs', { loginError: errString });
+};
+
+var getSignup = function(req, res) {
+	var errString = req.query.error;
+	res.render('signup.ejs', { signupError: errString });
+};
+
+var createAccount = function(req, res) {
+	var name = req.body.username;
+	var password = req.body.password;
+	var need = req.body.need;
+	var location = req.body.location;
+	var description = req.body.description;
+
+	req.session.user = name;
+	if (!name || !password || name === '' || password === '') {
+		// throw error if any field is blank
+		var signUpErr = encodeURIComponent('One or more fields left blank.');
+		res.redirect('/signup/?error=' + signUpErr);
+	}
+
+	db.userLookup(name, function(data1, err) {
+		if (err) {
+			var signUpErr = encodeURIComponent('Error signing up. Please try again.');
+			res.redirect('/signup/?error=' + signUpErr);
+		} else if (data1) {
+			// user already exists in database
+			var uExists = encodeURIComponent('Username ' + data1.name + ' already exists.');
+			res.redirect('/signup/?error=' + uExists);
+		} else {
+			bcrypt.hash(password, saltRounds, function(err, hash) {
+				if (err) {
+					var signUpErr = encodeURIComponent('Error hashing password');
+					res.redirect('/signup/?error=' + signUpErr);
+				} else {
+					db.userPut(name, hash, need, location, description);
+					//res.session.user = name; // to allow current use to enter homepage
+					req.session.user = name;
+					db.getEventModel().find().then((docs) => {
+						res.render('home.ejs', { input: { events: docs } });
+					});
+				}
+			});
+		}
+	});
+	//var errString = req.query.error;
+	//res.render('home.ejs', {signupError: errString});
+};
+
+var clear = function(req, res) {
+	db.userClear();
+	res.render('home.ejs');
+};
+
+var checkLogin = function(req, res) {
+	var username = req.body.username;
+	var password = req.body.password;
+	if (!username || !password || username === '' || password === '') {
+		// if any fields are blank, give an error
+		var errString = encodeURIComponent('One or more fields are blank.');
+		res.redirect('/?error=' + errString);
+	} else {
+		db.userLookup(username, function(data, err) {
+			if (err) {
+				var errString = encodeURIComponent('Error while logging in. Please try again.');
+				res.redirect('/?error=' + errString);
+			} else if (!data) {
+				var incorrectUorP = encodeURIComponent('Username or password incorrect.');
+				res.redirect('/?error=' + incorrectUorP);
+			} else {
+				console.log(data.password);
+				bcrypt.compare(password, data.password, function(err, result) {
+					if (err) {
+						var errStr = encodeURIComponent('Error finding password in database. Please try again.');
+						res.redirect('/?error=' + errStr);
+					} else if (data && result) {
+						// match password hash to one stored in database
+						req.session.user = username;
+						//res.redirect("/homepage");
+						db.getEventModel().find().then((docs) => {
+							res.render('home.ejs', { input: { events: docs } });
+						});
+					} else {
+						// incorrect username or password
+						var incorrectUorP = encodeURIComponent('Username or password incorrect.');
+						res.redirect('/?error=' + incorrectUorP);
+					}
+				});
+			}
+		});
+	}
+};
+
+var createEvent = function(req, res) {
+	var eventName = req.body.eventName;
+	var eventOwner = req.session.user;
+	//console.log(eventOwner);
+	var eventNeed = req.body.eventNeed;
+	var eventLocation = req.body.eventLocation;
+	var eventDescription = req.body.eventDescription;
+	if (!eventName || !eventDescription || eventName === '' || eventDescription === '') {
+		// throw error if any field is blank
+		var signUpErr = encodeURIComponent('One or more fields left blank.');
+		res.redirect('/signup/?error=' + signUpErr);
+		return;
+	}
+
+	db.eventLookup(eventName, function(data1, err) {
+		if (err) {
+			var signUpErr = encodeURIComponent('Error Creating Event. Please try again.');
+			res.redirect('/signup/?error=' + signUpErr);
+		} else if (data1) {
+			// event already exists in database
+			var evExists = encodeURIComponent('Event name ' + data1.name + ' already exists.');
+			res.redirect('/signup/?error=' + evExists);
+		} else {
+			db.eventPut(eventName, eventOwner, eventNeed, eventLocation, eventDescription);
+			db.getEventModel().find().then((docs) => {
+				res.render('home.ejs', { input: { events: docs } });
+			});
+		}
+	});
+};
 
 var routes = {
-    getHome: getHome,
-    postRequestTransactionHistoryCharity: postRequestTransactionHistoryCharity,
-    postRequestTransactionHistoryDonor: postRequestTransactionHistoryDonor,
-    postAllDonorsAndCharities: postAllDonorsAndCharities,
-    getTransactionHistoryFromAll: getTransactionHistoryFromAll,
-    getAdminView: getAdminView,
-    postAdminViewProcessing: postAdminViewProcessing,
-}
+	getHome: getHome,
+	postRequestTransactionHistoryCharity: postRequestTransactionHistoryCharity,
+	postRequestTransactionHistoryDonor: postRequestTransactionHistoryDonor,
+	postAllDonorsAndCharities: postAllDonorsAndCharities,
+	getTransactionHistoryFromAll: getTransactionHistoryFromAll,
+	getAdminView: getAdminView,
+	postAdminViewProcessing: postAdminViewProcessing,
+	get_login: getLogin,
+	get_signup: getSignup,
+	create_account: createAccount,
+	check_login: checkLogin,
+	clear: clear,
+	create_event: createEvent
+};
 
 module.exports = routes;
