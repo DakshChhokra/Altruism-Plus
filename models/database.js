@@ -60,6 +60,16 @@ var donorSchema = new Schema({
 	preferredCharities: [ ObjectId ]
 });
 
+var resourceSchema = new Schema({
+	name: String,
+	count: Number,
+	category: String,
+	description: String,
+	status: String,
+	photo: String,
+	promoted: Boolean
+});
+
 var CharityModel = mongoose.model('CharityModel', charitySchema);
 var EventModel = mongoose.model('EventModel', eventSchema);
 var ResourceModel = mongoose.model('ResourceModel', resourceSchema);

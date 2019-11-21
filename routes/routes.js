@@ -293,12 +293,13 @@ function initiateDB() {
 var getLogin = function(req, res) {
 	req.session.user = null;
 	var errString = req.query.error;
-	res.render('login.ejs', { loginError: errString });
+	console.log({ loginError: errString });
+	res.render('login', { loginError: errString });
 };
 
 var getSignup = function(req, res) {
 	var errString = req.query.error;
-	res.render('signup.ejs', { signupError: errString });
+	res.render('signup', { signupError: errString });
 };
 
 var createAccount = function(req, res) {
@@ -333,19 +334,19 @@ var createAccount = function(req, res) {
 					//res.session.user = name; // to allow current use to enter homepage
 					req.session.user = name;
 					db.getEventModel().find().then((docs) => {
-						res.render('home.ejs', { input: { events: docs } });
+						res.render('home', { input: { events: docs } });
 					});
 				}
 			});
 		}
 	});
 	//var errString = req.query.error;
-	//res.render('home.ejs', {signupError: errString});
+	//res.render('home', {signupError: errString});
 };
 
 var clear = function(req, res) {
 	db.userClear();
-	res.render('home.ejs');
+	res.render('home');
 };
 
 var checkLogin = function(req, res) {
@@ -374,7 +375,7 @@ var checkLogin = function(req, res) {
 						req.session.user = username;
 						//res.redirect("/homepage");
 						db.getEventModel().find().then((docs) => {
-							res.render('home.ejs', { input: { events: docs } });
+							res.render('home', { input: { events: docs } });
 						});
 					} else {
 						// incorrect username or password
@@ -412,7 +413,7 @@ var createEvent = function(req, res) {
 		} else {
 			db.eventPut(eventName, eventOwner, eventNeed, eventLocation, eventDescription);
 			db.getEventModel().find().then((docs) => {
-				res.render('home.ejs', { input: { events: docs } });
+				res.render('home', { input: { events: docs } });
 			});
 		}
 	});
