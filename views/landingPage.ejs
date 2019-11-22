@@ -4,19 +4,45 @@
     <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
     <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
     <link href="https://fonts.googleapis.com/css?family=Lobster" rel="stylesheet">
-    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
+<style>
+        .jumbotron{
+            margin: 20px 10px;
+        }
+        form{
+            margin: 20px 20px;
+        }
+    </style>
 </head>
 <body>
+<div class="container-fluid">
+    <div class="jumbotron">
+        <h2 class="text-success">Welcome to your Charity Management Page</h2>
+    </div>
+    <form action="/eventspage" method="POST">
 
-<form action="/eventspage" method="POST">
+        <button id="button" class="btn btn-primary btn-lg btn-block">Go to Events Page</button>
+    </form>
+    
+    <form action="/getRecommended" method="GET">
+        <button id="button" class="btn btn-primary btn-lg btn-block">View Charities Which Match My Preferences</button>
+    </form>
+    
+    <form action="/updatePrefAndInfo" method="GET">
+        <button id="button" class="btn btn-primary btn-lg btn-block">Update Preferences and other Information</button>
+    </form>
+    
+    <form action="/home" method="GET">
+        <button id="button" class="btn btn-primary btn-lg btn-block">View General Information About The Users on This Site</button>
+    </form>
 
-    <button id="button" class="btn btn-primary">Go to Events Page</button>
-</form>
-
+    <form action="/donationStatus" method="GET">
+        <button id="button" class="btn btn-primary btn-lg btn-block">Status of Accepted Donations </button>
+    </form>
+</div>
 
 </body>
 </html>

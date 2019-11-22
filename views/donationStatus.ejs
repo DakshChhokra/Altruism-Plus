@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Home</title>
+    <style>
+        .jumbotron{
+            margin: 20px 10px;
+        }
+        .row{
+            margin: 20px 10px;
+        }
+        form{
+            margin: 20px 20px;
+        }
+    </style>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">    
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="jumbotron">
+            <h1 class="text-success">These Are The Donations you have accepted on the Portal</h1>
+        </div>
+        <div class="container">
+
+           
+                
+
+                    
+                        <% input.resources.forEach(function (el) { %>
+                            <div class="row">
+                                    <div class="col-sm-10">
+                            <div class="media border p-3">
+                                    <div class="media-body">
+                            <p><b>Name of Resource: </b> <%=el.name%></p>
+                            <p><b>Count of Resource: </b> <%=el.count%></p>
+                            <p><b>Category of Resource: </b> <%=el.category%></p>
+                            <p><b>Description of Resource: </b> <%=el.description%></p>
+                            <p><b>Status of Resource: </b> <%=el.status%></p>
+                            <% if (el && el.status == 'Delivered') { %>
+                                <form action="/donationStatus" method="GET">
+                                    <button id="button" class="btn btn-danger btn-lg" disabled>Resource is Recieved </button>
+                                </form>
+                            <% } else { %>
+                                <form action="/markDonationAsRecieved" method="POST">
+                                    <button class="btn btn-primary btn-lg" name='result' type="submit" value="<%=el.name%>" class="btn">Mark Resource as Recieved</button>
+                                </form>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                        <% }) %>
+                    
+
+
+                        
+                    
+            
+
+
+        </div>  
+    </div>
+</body>
+</html>

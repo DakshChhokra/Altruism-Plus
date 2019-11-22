@@ -23,7 +23,7 @@ app.use(
 
 app.use(express.static(__dirname + '/public'));
 
-//Routes
+//Daksh
 
 app.get('/home', routes.getHome);
 
@@ -39,9 +39,17 @@ app.get('/adminView', routes.getAdminView);
 
 app.post('/adminViewProcessing', routes.postAdminViewProcessing);
 
+app.get('/getRecommended', routes.getRecommended);
+
+app.get('/updatePrefAndInfo', routes.getPrefAndInfo);
+
+app.post('/updatePrefAndInfo', routes.postPrefAndInfo);
+
+app.get('/donationStatus', routes.getdonationStatus);
+
+app.post('/markDonationAsRecieved', routes.postMarkDonationAsRecieved);
+
 //Arthur
-
-
 
 app.get('/', routes.get_login);
 

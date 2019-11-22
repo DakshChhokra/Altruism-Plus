@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title><%= input.name%></title>
+    <style>
+            .jumbotron{
+                margin: 20px 10px;
+            }
+            form{
+                margin: 20px 20px;
+            }
+        </style>
+            <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">    
+</head>
+<body>
+    <div class="container-fluid"> 
+            <div class="jumbotron">
+                    <h1 class="text-success">These are the preferred donors </h1>
+                </div>
+                
+                <h2>These Donors are in the same physical location and willing to donate the items you need</h2>
+                <ol>
+                    <% input.donorsPerfect.forEach(function (el) { %>
+                        <% string = "/transactionHistoryFromAll?type=donor&donorName=" + el.name %>
+                        <li> <a href="<%=string%>"> <%= el.name %> </a></li>
+                    <%})%>
+                </ol>
+            
+                <h2>These Donors are willing to donate the items you need</h2>
+                <ol>
+                    <% input.donorsPreference.forEach(function (el) { %>
+                        <% string = "/transactionHistoryFromAll?type=donor&donorName=" + el.name %>
+                        <li> <a href="<%=string%>"> <%= el.name %> </a></li>
+                    <%})%>
+                </ol>
+            
+                <h2>These Donors are in the same physical location as you</h2>
+                <ol>
+                    <% input.donorsLocation.forEach(function (el) { %>
+                        <% string = "/transactionHistoryFromAll?type=donor&donorName=" + el.name %>
+                        <li> <a href="<%=string%>"> <%= el.name %> </a></li>
+                    <%})%>
+                </ol>
+    </div>
+
+</body>
+</html>

@@ -7,7 +7,6 @@ mongoose.connect(mongoDBPort, mongooseConfig);
 mongoose.set('useFindAndModify', false);
 
 var Schema = mongoose.Schema;
-var ObjectId = Schema.Types.ObjectId;
 
 var charitySchema = new Schema({
 	name: String,
@@ -16,10 +15,17 @@ var charitySchema = new Schema({
 	location: String,
 	description: String,
 	photo: String,
-	notificationHistory: [{eventName: String, requesterName: String}],
-	requestedHistory: [String],
-	transactionHistory: [ ObjectId ],
-	preferredDonors: [ ObjectId ]
+	notificationHistory: [ { eventName: String, requesterName: String } ],
+	requestedHistory: [ String ],
+	transactionHistory: [
+		{
+			from: String,
+			to: String,
+			resource: String,
+			timeStamp: String
+		}
+	],
+	preferredDonors: [ String ]
 });
 
 var eventSchema = new Schema({
@@ -28,7 +34,7 @@ var eventSchema = new Schema({
 	need: String,
 	location: String,
 	description: String,
-	beneficiaries: [{beneficiaryName : String}]
+	beneficiaries: [ { beneficiaryName: String } ]
 });
 
 var resourceSchema = new Schema({
@@ -40,28 +46,28 @@ var resourceSchema = new Schema({
 	photo: String,
 	promoted: Boolean
 });
-var transactionSchema = new Schema({
-	from: String,
-	to: String,
-	resource: String,
-	timeStamp: String
-});
 
 var donorSchema = new Schema({
 	name: String,
+	password: String,
 	location: String,
 	preferredCategory: String,
-	transactionHistory: [ ObjectId ],
+	transactionHistory: [
+		{
+			from: String,
+			to: String,
+			resource: String,
+			timeStamp: String
+		}
+	],
 	photo: String,
 	description: String,
-	excessResources: [ ObjectId ],
-	friends: [ ObjectId ],
-	preferredCharities: [ ObjectId ]
+	friends: [ String ],
+	preferredCharities: [ String ]
 });
 
 var CharityModel = mongoose.model('CharityModel', charitySchema);
 var ResourceModel = mongoose.model('ResourceModel', resourceSchema);
-var TransactionModel = mongoose.model('TransactionModel', transactionSchema);
 var DonorModel = mongoose.model('DonorModel', donorSchema);
 var EventModel = mongoose.model('EventModel', eventSchema);
 
@@ -105,9 +111,12 @@ var event_put = function(eventName, owner, need, location, description, route_ca
 		location: location,
 		description: description
 	});
-	eventOne.save();
+	eventOne.save((err, doc) => {
+		if (doc) {
+			route_callback();
+		}
+	});
 	console.log('1 event inserted');
-	route_callback();
 };
 
 var event_lookup = function(eventName, route_callback) {
@@ -128,50 +137,69 @@ var get_event_model = function() {
 	return EventModel;
 };
 
-
 var add_notification = function(eventOwner, requester, eventName, route_callback) {
-	CharityModel.findOneAndUpdate({name : eventOwner}, {$push : {notificationHistory : {"eventName" : eventName, "requesterName" : requester}}}, (err, doc) => {
-			if (err) { console.error(err); }
-			});
-	CharityModel.findOneAndUpdate({name : requester}, {$push : {requestedHistory : eventName}}, (err, doc) => {
-			if (err) { console.error(err); }
-			});
-	console.log("updated notifications for " + eventOwner);
+	CharityModel.findOneAndUpdate(
+		{ name: eventOwner },
+		{ $push: { notificationHistory: { eventName: eventName, requesterName: requester } } },
+		(err, doc) => {
+			if (err) {
+				console.error(err);
+			}
+		}
+	);
+	CharityModel.findOneAndUpdate({ name: requester }, { $push: { requestedHistory: eventName } }, (err, doc) => {
+		if (err) {
+			console.error(err);
+		}
+	});
+	console.log('updated notifications for ' + eventOwner);
 	route_callback();
-}
+};
 
 var add_beneficiary = function(beneficiary, eventName, route_callback) {
-	EventModel.findOneAndUpdate({name : eventName}, {$push : {beneficiaries : {"beneficiaryName" : beneficiary}}},
+	EventModel.findOneAndUpdate(
+		{ name: eventName },
+		{ $push: { beneficiaries: { beneficiaryName: beneficiary } } },
 		(err, doc) => {
-			if (err) { console.error(err); }
-			});
-	console.log("updated beneficiaries for " + eventName);
+			if (err) {
+				console.error(err);
+			}
+		}
+	);
+	console.log('updated beneficiaries for ' + eventName);
 	route_callback();
-}
+};
 
 var remove_notification = function(eventOwner, requester, eventName, route_callback) {
-	CharityModel.findOneAndUpdate({name : eventOwner}, {$pull : {notificationHistory : {"eventName" : eventName, "requesterName" : requester}}},
+	CharityModel.findOneAndUpdate(
+		{ name: eventOwner },
+		{ $pull: { notificationHistory: { eventName: eventName, requesterName: requester } } },
 		(err, doc) => {
-			if (err) { console.error(err); }
-			});
-	CharityModel.findOneAndUpdate({name : requester}, {$pull : {requestedHistory : eventName}}, (err, doc) => {
-		if (err) { console.error(err); }
-		});
-	console.log("pulled notifications for " + eventOwner);
+			if (err) {
+				console.error(err);
+			}
+		}
+	);
+	CharityModel.findOneAndUpdate({ name: requester }, { $pull: { requestedHistory: eventName } }, (err, doc) => {
+		if (err) {
+			console.error(err);
+		}
+	});
+	console.log('pulled notifications for ' + eventOwner);
 	route_callback();
-}
+};
 
 var update_photo = function(userName, updatePhoto, route_callback) {
-	DonorModel.findOneAndUpdate({name : userName}, { photo : updatePhoto},
-		(err, doc) => {
-			if (err) { console.error(err); }
-			});
-	console.log("updating photo for" + eventOwner);
-	if(route_callback) {
+	DonorModel.findOneAndUpdate({ name: userName }, { photo: updatePhoto }, (err, doc) => {
+		if (err) {
+			console.error(err);
+		}
+	});
+	console.log('updating photo for' + eventOwner);
+	if (route_callback) {
 		route_callback();
 	}
-}
-
+};
 
 var database = {
 	userPut: user_put,
@@ -183,11 +211,10 @@ var database = {
 	addNotification: add_notification,
 	removeNotification: remove_notification,
 	addBeneficiary: add_beneficiary,
-	updatePhoto: update_photo
+	updatePhoto: update_photo,
+	CharityModel: CharityModel,
+	DonorModel: DonorModel,
+	ResourceModel: ResourceModel
 };
 
-exports.CharityModel = CharityModel;
-exports.ResourceModel = ResourceModel;
-exports.TransactionModel = TransactionModel;
-exports.DonorModel = DonorModel;
 module.exports = database;

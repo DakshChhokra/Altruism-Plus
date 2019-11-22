@@ -11,12 +11,72 @@ app.use(express.static(__dirname + '/public'));
 
 const saltRounds = 10; // constant needed for bcrypt hash
 
+var getRecommended = function(req, res) {
+	var charityName = req.session.user;
+	console.log(charityName);
+	getRecommendedHelper(charityName, res);
+};
+
+async function getRecommendedHelper(charityName, res) {
+	console.log(charityName);
+	var charityObject = await getCharity(charityName);
+
+	var allDonorsWhichMatchPref = await donorPref(charityObject.need);
+	allDonorsWhichMatchPref.filter((item, index) => allDonorsWhichMatchPref.indexOf(item) === index);
+
+	var allDonorsWhichMatchLocation = await donorLocation(charityObject.location);
+	allDonorsWhichMatchLocation.filter((item, index) => allDonorsWhichMatchLocation.indexOf(item) === index);
+
+	if (allDonorsWhichMatchLocation.length > allDonorsWhichMatchPref.length) {
+		var perfectMatch = allDonorsWhichMatchPref.slice();
+		allDonorsWhichMatchLocation.filter((value) => -1 !== allDonorsWhichMatchLocation.indexOf(value));
+	} else {
+		var perfectMatch = allDonorsWhichMatchLocation.slice();
+		perfectMatch.filter((value) => -1 !== allDonorsWhichMatchPref.indexOf(value));
+	}
+
+	res.render('reccCharities.ejs', {
+		input: {
+			donorsPerfect: perfectMatch,
+			donorsPreference: allDonorsWhichMatchPref,
+			donorsLocation: allDonorsWhichMatchLocation
+		}
+	});
+}
+
+function donorLocation(charitylocation) {
+	return db.DonorModel.find({ location: charitylocation }).exec();
+}
+function donorPref(charitypref) {
+	return db.DonorModel.find({ preferredCategory: charitypref }).exec();
+}
+
 var getHome = function(req, res) {
 	// initiateDB();
-	// testingUpdates(res);
+	// otherFunctionToTestDB();
 	res.render('otherHome.ejs');
 };
 
+async function otherFunctionToTestDB() {
+	var getDaksh = await getCharity('daksh');
+	var t1 = {
+		from: 'Jules Saladana',
+		to: 'daksh',
+		resource: '10Blankets',
+		timeStamp: new Date().toISOString()
+	};
+
+	var t2 = {
+		from: 'Jules Saladana',
+		to: 'daksh',
+		resource: '3Pants',
+		timeStamp: new Date().toISOString()
+	};
+	getDaksh.transactionHistory.push(t1);
+	getDaksh.transactionHistory.push(t2);
+	var stat = await getDaksh.save();
+	console.log('sneaky ops done');
+}
 var postRequestTransactionHistoryCharity = function(req, res) {
 	var charityName = req.body.charityName;
 	printCharities(charityName, res);
@@ -103,33 +163,20 @@ function updateTransactionHistoryForDonor(donorID, transactionID) {
 	db.DonorModel.findByIdAndUpdate(donorID, { $push: { transactionHistory: transactionID } }, { new: true }).exec();
 }
 
-async function testingUpdates(res) {
-	var up1 = await updateTransactionHistoryForCharity(charityOneId, transactionOneId);
-	var up2 = await updateTransactionHistoryForCharity(charityOneId, transactionTwoId);
-	var up3 = await updateTransactionHistoryForCharity(charityOneId, transactionThreeId);
-	var up4 = await updateTransactionHistoryForCharity(charityTwoId, transactionFourId);
-	var up5 = await updateTransactionHistoryForCharity(charityTwoId, transactionFiveId);
-
-	var down1 = await updateTransactionHistoryForDonor(donorOneId, transactionOneId);
-	var down2 = await updateTransactionHistoryForDonor(donorTwoId, transactionTwoId);
-	var down3 = await updateTransactionHistoryForDonor(donorOneId, transactionThreeId);
-	var down4 = await updateTransactionHistoryForDonor(donorOneId, transactionFourId);
-	var down5 = await updateTransactionHistoryForDonor(donorTwoId, transactionFiveId);
-	// res.render('home');
-}
-
 async function printCharities(charityName, res) {
 	var charityObject = await getCharity(charityName);
-	var transactionHistory = await transactionForCharity(charityObject.name);
+	// var transactionHistory = await transactionForCharity(charityObject.name);
 	res.render('singleCharityView.ejs', {
-		input: { name: charityObject.name, transactionHistory: transactionHistory }
+		input: { name: charityObject.name, transactionHistory: charityObject.transactionHistory }
 	});
 }
 
 async function printDonor(donorName, res) {
 	var donorObject = await getDonor(donorName);
-	var transactionHistory = await transactionForDonor(donorObject.name);
-	res.render('singleDonorView.ejs', { input: { name: donorObject.name, transactionHistory: transactionHistory } });
+	// var transactionHistory = await transactionForDonor(donorObject.name);
+	res.render('singleDonorView.ejs', {
+		input: { name: donorObject.name, transactionHistory: donorObject.transactionHistory }
+	});
 }
 
 async function getAllCharitiesAndDonors(res) {
@@ -138,74 +185,87 @@ async function getAllCharitiesAndDonors(res) {
 	res.render('allCharitiesAndDonors.ejs', { input: { charities: allCharities, donors: allDonors } });
 }
 
-function initiateDB() {
-	var charityOneId;
+async function initiateDB() {
+	var transaction1 = {
+		from: 'Joe Schmoe',
+		to: 'McCharity Charity',
+		resource: '10Blankets',
+		timeStamp: new Date().toISOString()
+	};
+	var transaction2 = {
+		from: 'Joe Schmoe',
+		to: 'McCharity Charity',
+		resource: '3Pants',
+		timeStamp: new Date().toISOString()
+	};
+	var transaction3 = {
+		from: 'Jules Saladana',
+		to: 'Damn',
+		resource: '3Pants',
+		timeStamp: new Date().toISOString()
+	};
+	var transaction4 = {
+		from: 'Jules Saladana',
+		to: 'Damn',
+		resource: '10Blankets',
+		timeStamp: new Date().toISOString()
+	};
+
 	const charityOne = new db.CharityModel({
 		name: 'McCharity Charity',
-		need: [ 'Wood', 'Iron' ],
-		listOfResources: [],
+		password: '1231231l31.madso12-o31=20o31',
+		need: 'Blankets',
 		location: 'Gibraltar',
-		description: 'nah, there is no description',
+		description: 'itts 2010. rage comics are back bby',
 		photo: '',
-		transactionHistory: [],
+		transactionHistory: [ transaction1, transaction2 ],
 		preferredDonors: []
 	});
-	charityOne.save((err, object) => {
-		charityOneId = object.id;
-	});
+	var c1 = await charityOne.save();
 
-	var charityTwoId;
 	const charityTwo = new db.CharityModel({
 		name: 'Damn',
-		need: [ 'Blanket', 'Food' ],
-		listOfResources: [],
+		password: '1231231l31.madso12-o31=20o31',
+		need: 'Food',
 		location: 'Midway Islands',
 		description: 'nah, there is no description',
 		photo: '',
-		transactionHistory: [],
+		transactionHistory: [ transaction3, transaction4 ],
 		preferredDonors: []
 	});
-	charityTwo.save((err, obj) => {
-		charityTwoId = obj.id;
-	});
+
+	var c2 = await charityTwo.save();
 
 	const donorOne = new db.DonorModel({
 		name: 'Joe Schmoe',
+		password: '7821391b92jklsa',
 		location: 'Philadelphia',
-		preferredCategory: 'Furniture',
-		transactionHistory: [],
+		preferredCategory: 'Blankets',
+		transactionHistory: [ transaction1, transaction2 ],
 		photo: '',
 		description: 'Sells furniture',
-		excessResources: [],
 		friends: [],
 		preferredCharities: []
 	});
 
-	var donorOneId;
-	donorOne.save((err, obj) => {
-		donorOneId = obj.id;
-	});
+	var d1 = donorOne.save();
 
 	const donorTwo = new db.DonorModel({
 		name: 'Jules Saladana',
+		password: '7821391b92jklsa',
 		location: 'New York',
-		preferredCategory: 'Electronics',
-		transactionHistory: [],
+		preferredCategory: 'Blankets',
+		transactionHistory: [ transaction3, transaction4 ],
 		photo: '',
 		description: 'Fixes electronics',
-		excessResources: [],
 		friends: [],
 		preferredCharities: []
 	});
 
-	var donorTwoId;
-	donorTwo.save((err, obj) => {
-		donorTwoId = obj._id;
-	});
+	var d2 = donorTwo.save();
 
-	var resourceOneId;
 	const resourceOne = new db.ResourceModel({
-		name: 'Blankets',
+		name: '10Blankets',
 		count: 10,
 		category: 'Essentials',
 		description: 'Non threadbare blankets',
@@ -213,13 +273,10 @@ function initiateDB() {
 		photo: '',
 		promoted: false
 	});
-	resourceOne.save((err, obj) => {
-		resourceOneId = obj.id;
-	});
+	var r1 = resourceOne.save();
 
-	var resourceTwoId;
 	const resourceTwo = new db.ResourceModel({
-		name: 'Pants',
+		name: '3Pants',
 		count: 3,
 		category: 'Clothing',
 		description: 'Denim Pants',
@@ -227,64 +284,7 @@ function initiateDB() {
 		photo: '',
 		promoted: true
 	});
-	resourceTwo.save((err, obj) => {
-		resourceTwoId = obj.id;
-	});
-
-	var transactionOneId;
-	const transactionOne = new db.TransactionModel({
-		from: 'Joe Schmoe',
-		to: 'McCharity Charity',
-		resource: 'Blankets',
-		timeStamp: new Date().toISOString()
-	});
-	transactionOne.save((err, obj) => {
-		transactionOneId = obj.id;
-	});
-
-	var transactionTwoId;
-	const transactionTwo = new db.TransactionModel({
-		from: 'Jules Saladana',
-		to: 'McCharity Charity',
-		resource: 'Blankets',
-		timeStamp: new Date().toISOString()
-	});
-	transactionTwo.save((err, obj) => {
-		transactionTwoId = obj.id;
-	});
-
-	var transactionThreeId;
-	const transactionThree = new db.TransactionModel({
-		from: 'Joe Schmoe',
-		to: 'McCharity Charity',
-		resource: 'Pants',
-		timeStamp: new Date().toISOString()
-	});
-	transactionThree.save((err, obj) => {
-		transactionThreeId = obj.id;
-	});
-
-	var transactionFourId;
-	const transactionFour = new db.TransactionModel({
-		from: 'Joe Schmoe',
-		to: 'Damn',
-		resource: 'Pants',
-		timeStamp: new Date().toISOString()
-	});
-	transactionFour.save((err, obj) => {
-		transactionFourId = obj.id;
-	});
-
-	var transactionFiveId;
-	const transactionFive = new db.TransactionModel({
-		from: 'Jules Saladana',
-		to: 'Damn',
-		resource: 'Pants',
-		timeStamp: new Date().toISOString()
-	});
-	transactionFive.save((err, obj) => {
-		transactionFiveId = obj.id;
-	});
+	var r2 = resourceTwo.save();
 }
 
 var getLogin = function(req, res) {
@@ -391,7 +391,8 @@ var createEvent = function(req, res) {
 	if (!eventName || !eventDescription || eventName === '' || eventDescription === '') {
 		// throw error if any field is blank
 		var signUpErr = encodeURIComponent('One or more fields left blank.');
-		res.redirect('/signup/?error=' + signUpErr);
+		// res.redirect('/signup/?error=' + signUpErr);
+		res.render('landingPage.ejs');
 		return;
 	}
 
@@ -402,13 +403,21 @@ var createEvent = function(req, res) {
 		} else if (data1) {
 			// event already exists in database
 			var evExists = encodeURIComponent('Event name ' + data1.name + ' already exists.');
-			res.redirect('/signup/?error=' + evExists);
+			// res.redirect('/signup/?error=' + evExists);
+			res.render('landingPage.ejs');
 		} else {
 			db.eventPut(eventName, eventOwner, eventNeed, eventLocation, eventDescription, function() {
 				db.getEventModel().find().then((docs) => {
 					db.userLookup(req.session.user, function(userObj, err) {
-						res.render('home.ejs', { input: {events: docs , user : req.session.user , requestedHist : userObj.requestedHistory, notifications : userObj.notificationHistory}});
-					})
+						res.render('home.ejs', {
+							input: {
+								events: docs,
+								user: req.session.user,
+								requestedHist: userObj.requestedHistory,
+								notifications: userObj.notificationHistory
+							}
+						});
+					});
 				});
 			});
 		}
@@ -418,8 +427,15 @@ var createEvent = function(req, res) {
 var eventsPage = function(req, res) {
 	db.getEventModel().find().then((docs) => {
 		db.userLookup(req.session.user, function(userObj, err) {
-			res.render('home.ejs', { input: {events: docs , user : req.session.user , requestedHist : userObj.requestedHistory, notifications : userObj.notificationHistory}});
-		})
+			res.render('home.ejs', {
+				input: {
+					events: docs,
+					user: req.session.user,
+					requestedHist: userObj.requestedHistory,
+					notifications: userObj.notificationHistory
+				}
+			});
+		});
 	});
 };
 
@@ -433,42 +449,115 @@ var sendNotification = function(req, res) {
 	db.addNotification(eventOwner, requester, eventName, function() {
 		db.getEventModel().find().then((docs) => {
 			db.userLookup(req.session.user, function(userObj, err) {
-				res.render('home.ejs', { input: {events: docs , user : req.session.user , requestedHist : userObj.requestedHistory, notifications : userObj.notificationHistory}});
+				res.render('home.ejs', {
+					input: {
+						events: docs,
+						user: req.session.user,
+						requestedHist: userObj.requestedHistory,
+						notifications: userObj.notificationHistory
+					}
+				});
 			});
 		});
-    });
+	});
 };
 
+var getPrefAndInfo = function(req, res) {
+	res.render('updatePrefs.ejs', { input: req.session.user });
+};
+var postPrefAndInfo = function(req, res) {
+	console.log(req.body);
+	postPrefAndInfoHelper(req, res);
+};
+
+async function postPrefAndInfoHelper(req, res) {
+	let charityObj = await db.CharityModel.findOne({ name: req.session.user });
+	if (req.body.need.length > 0) {
+		charityObj.need = req.body.need;
+	}
+	if (req.body.description.length > 0) {
+		charityObj.description = req.body.description;
+	}
+	if (req.body.location.length > 0) {
+		charityObj.location = req.body.location;
+	}
+	var co = await charityObj.save();
+	res.render('landingPage.ejs');
+}
+
+var getdonationStatus = function(req, res) {
+	getdonationStatusHelper(req, res);
+};
+
+async function getdonationStatusHelper(req, res) {
+	var charityObject = await getCharity(req.session.user);
+	var transactionHistoryList = charityObject.transactionHistory;
+	var listOfResources = [];
+	for (let index = 0; index < transactionHistoryList.length; index++) {
+		var resourceBound = await getResource(transactionHistoryList[index].resource);
+		listOfResources.push(resourceBound);
+	}
+	res.render('donationStatus.ejs', { input: { resources: listOfResources } });
+}
+
+var postMarkDonationAsRecieved = function(req, res) {
+	console.log('req.body.result', req.body.result);
+	postMarkDonationAsRecievedHelper(req, res);
+};
+
+async function postMarkDonationAsRecievedHelper(req, res) {
+	var resource = await getResource(req.body.result);
+	console.log('resource', resource);
+	resource.status = 'Delivered';
+	var afterUpdate = await resource.save();
+	res.render('landingPage.ejs');
+}
+
+function getResource(resourceName) {
+	return db.ResourceModel.findOne({ name: resourceName }).exec();
+}
 
 var confirmNotification = function(req, res) {
 	var string = req.body.result;
 	var array = string.split('*');
 	var eventName = array[0];
-	var result = array[1]
+	var result = array[1];
 	var requesterName = array[2];
 
 	console.log(string);
 
 	db.removeNotification(req.session.user, requesterName, eventName, function() {
-		if (result == "yes") {
+		if (result == 'yes') {
 			db.addBeneficiary(requesterName, eventName, function() {
 				db.getEventModel().find().then((docs) => {
 					db.userLookup(req.session.user, function(userObj, err) {
-						res.render('home.ejs', { input: {events: docs , user : req.session.user , requestedHist : userObj.requestedHistory, notifications : userObj.notificationHistory}});
+						res.render('home.ejs', {
+							input: {
+								events: docs,
+								user: req.session.user,
+								requestedHist: userObj.requestedHistory,
+								notifications: userObj.notificationHistory
+							}
+						});
 					});
 				});
-	    	});
+			});
 		} else {
 			db.getEventModel().find().then((docs) => {
 				db.userLookup(req.session.user, function(userObj, err) {
-					res.render('home.ejs', { input: {events: docs , user : req.session.user, requestedHist : userObj.requestedHistory, notifications : userObj.notificationHistory}});
+					res.render('home.ejs', {
+						input: {
+							events: docs,
+							user: req.session.user,
+							requestedHist: userObj.requestedHistory,
+							notifications: userObj.notificationHistory
+						}
+					});
 				});
 			});
 		}
-    });
-
-
-}
+	});
+};
 var routes = {
 	getHome: getHome,
 	postRequestTransactionHistoryCharity: postRequestTransactionHistoryCharity,
@@ -485,7 +574,12 @@ var routes = {
 	create_event: createEvent,
 	events_page: eventsPage,
 	send_notification: sendNotification,
-	confirm_notification: confirmNotification
+	confirm_notification: confirmNotification,
+	getRecommended: getRecommended,
+	getPrefAndInfo: getPrefAndInfo,
+	postPrefAndInfo: postPrefAndInfo,
+	getdonationStatus: getdonationStatus,
+	postMarkDonationAsRecieved: postMarkDonationAsRecieved
 };
 
 module.exports = routes;
