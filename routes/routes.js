@@ -294,6 +294,7 @@ var getLogin = function(req, res) {
 };
 
 var getSignup = function(req, res) {
+	req.session.user = null;
 	var errString = req.query.error;
 	res.render('signup.ejs', { signupError: errString });
 };
@@ -329,9 +330,7 @@ var createAccount = function(req, res) {
 					db.userPut(name, hash, need, location, description);
 					//res.session.user = name; // to allow current use to enter homepage
 					req.session.user = name;
-					db.getEventModel().find().then((docs) => {
-						res.render('home.ejs', { input: { events: docs } });
-					});
+					res.render('landingPage.ejs');
 				}
 			});
 		}
@@ -370,9 +369,7 @@ var checkLogin = function(req, res) {
 						// match password hash to one stored in database
 						req.session.user = username;
 						//res.redirect("/homepage");
-						db.getEventModel().find().then((docs) => {
-							res.render('home.ejs', { input: { events: docs } });
-						});
+						res.render('landingPage.ejs');
 					} else {
 						// incorrect username or password
 						var incorrectUorP = encodeURIComponent('Username or password incorrect.');
@@ -415,6 +412,15 @@ var createEvent = function(req, res) {
 	});
 };
 
+
+
+var eventsPage = function(req, res) {
+	db.getEventModel().find().then((docs) => {
+		res.render('home.ejs', { input: { events: docs } });
+	});
+};
+
+
 var routes = {
 	getHome: getHome,
 	postRequestTransactionHistoryCharity: postRequestTransactionHistoryCharity,
@@ -428,7 +434,8 @@ var routes = {
 	create_account: createAccount,
 	check_login: checkLogin,
 	clear: clear,
-	create_event: createEvent
+	create_event: createEvent,
+	events_page: eventsPage
 };
 
 module.exports = routes;

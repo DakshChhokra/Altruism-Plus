@@ -9,7 +9,7 @@ var server = app.listen(port, () => {
 	console.log('Server started on port ' + port);
 });
 
-//Use Object Id - instead of
+//Use Object Id - instead ofreq.session.user = null;
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(
@@ -41,6 +41,8 @@ app.post('/adminViewProcessing', routes.postAdminViewProcessing);
 
 //Arthur
 
+
+
 app.get('/', routes.get_login);
 
 app.get('/signup', routes.get_signup);
@@ -52,3 +54,6 @@ app.post('/createaccount', routes.create_account);
 app.post('/checklogin', routes.check_login);
 
 app.post('/createevent', routes.create_event);
+
+app.post('/eventspage', routes.events_page);
+
