@@ -52,8 +52,8 @@ function donorPref(charitypref) {
 }
 
 var getHome = function(req, res) {
-	initiateDB();
-	otherFunctionToTestDB();
+	// initiateDB();
+	// otherFunctionToTestDB();
 	res.render('otherHome.ejs');
 };
 
