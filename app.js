@@ -57,6 +57,8 @@ app.get('/signup', routes.get_signup);
 
 app.get('/clear', routes.clear);
 
+app.get('/homeAfterFormSubmission', routes.home_after_form_submission);
+
 app.post('/createaccount', routes.create_account);
 
 app.post('/checklogin', routes.check_login);

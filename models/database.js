@@ -81,7 +81,7 @@ var user_put = function(username, hash, need, location, description, route_callb
 		description: description
 	});
 	charityOne.save();
-	console.log('1 charity inserted');
+	//console.log('1 charity inserted');
 };
 
 var user_lookup = function(username, route_callback) {
@@ -120,7 +120,7 @@ var event_put = function(eventName, owner, need, location, description, route_ca
 };
 
 var event_lookup = function(eventName, route_callback) {
-	console.log('Looking Up Event: ' + eventName);
+	//console.log('Looking Up Event: ' + eventName);
 	EventModel.findOne({ name: eventName }, function(err, res) {
 		if (err) {
 			route_callback(null, 'Lookup error: ' + err);
@@ -129,7 +129,6 @@ var event_lookup = function(eventName, route_callback) {
 				route_callback(res, null);
 			}
 		}
-		console.log('event lookup');
 	});
 };
 
@@ -164,29 +163,37 @@ var add_beneficiary = function(beneficiary, eventName, route_callback) {
 			if (err) {
 				console.error(err);
 			}
+			else {
+				route_callback();
+			}
 		}
 	);
 	console.log('updated beneficiaries for ' + eventName);
-	route_callback();
+
 };
 
-var remove_notification = function(eventOwner, requester, eventName, route_callback) {
+var remove_notification = function(eventOwner, requester, eventName, result, route_callback) {
 	CharityModel.findOneAndUpdate(
 		{ name: eventOwner },
 		{ $pull: { notificationHistory: { eventName: eventName, requesterName: requester } } },
 		(err, doc) => {
 			if (err) {
 				console.error(err);
+			} else {
+			route_callback();
 			}
 		}
 	);
+
+/*
 	CharityModel.findOneAndUpdate({ name: requester }, { $pull: { requestedHistory: eventName } }, (err, doc) => {
 		if (err) {
 			console.error(err);
 		}
 	});
+*/
 	console.log('pulled notifications for ' + eventOwner);
-	route_callback();
+
 };
 
 var update_photo = function(userName, updatePhoto, route_callback) {

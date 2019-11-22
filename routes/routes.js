@@ -392,7 +392,7 @@ var createEvent = function(req, res) {
 		// throw error if any field is blank
 		var signUpErr = encodeURIComponent('One or more fields left blank.');
 		// res.redirect('/signup/?error=' + signUpErr);
-		res.render('landingPage.ejs');
+		res.redirect("/homeAfterFormSubmission");
 		return;
 	}
 
@@ -404,39 +404,17 @@ var createEvent = function(req, res) {
 			// event already exists in database
 			var evExists = encodeURIComponent('Event name ' + data1.name + ' already exists.');
 			// res.redirect('/signup/?error=' + evExists);
-			res.render('landingPage.ejs');
+			res.redirect("/homeAfterFormSubmission");
 		} else {
 			db.eventPut(eventName, eventOwner, eventNeed, eventLocation, eventDescription, function() {
-				db.getEventModel().find().then((docs) => {
-					db.userLookup(req.session.user, function(userObj, err) {
-						res.render('home.ejs', {
-							input: {
-								events: docs,
-								user: req.session.user,
-								requestedHist: userObj.requestedHistory,
-								notifications: userObj.notificationHistory
-							}
-						});
-					});
-				});
+				res.redirect("/homeAfterFormSubmission");
 			});
 		}
 	});
 };
 
 var eventsPage = function(req, res) {
-	db.getEventModel().find().then((docs) => {
-		db.userLookup(req.session.user, function(userObj, err) {
-			res.render('home.ejs', {
-				input: {
-					events: docs,
-					user: req.session.user,
-					requestedHist: userObj.requestedHistory,
-					notifications: userObj.notificationHistory
-				}
-			});
-		});
-	});
+	res.redirect("/homeAfterFormSubmission");
 };
 
 var sendNotification = function(req, res) {
@@ -447,18 +425,7 @@ var sendNotification = function(req, res) {
 	var eventOwner = array[2];
 	console.log(string);
 	db.addNotification(eventOwner, requester, eventName, function() {
-		db.getEventModel().find().then((docs) => {
-			db.userLookup(req.session.user, function(userObj, err) {
-				res.render('home.ejs', {
-					input: {
-						events: docs,
-						user: req.session.user,
-						requestedHist: userObj.requestedHistory,
-						notifications: userObj.notificationHistory
-					}
-				});
-			});
-		});
+		res.redirect("/homeAfterFormSubmission");
 	});
 };
 
@@ -526,38 +493,32 @@ var confirmNotification = function(req, res) {
 
 	console.log(string);
 
-	db.removeNotification(req.session.user, requesterName, eventName, function() {
+	db.removeNotification(req.session.user, requesterName, eventName, result, function() {
 		if (result == 'yes') {
 			db.addBeneficiary(requesterName, eventName, function() {
-				db.getEventModel().find().then((docs) => {
-					db.userLookup(req.session.user, function(userObj, err) {
-						res.render('home.ejs', {
-							input: {
-								events: docs,
-								user: req.session.user,
-								requestedHist: userObj.requestedHistory,
-								notifications: userObj.notificationHistory
-							}
-						});
-					});
-				});
+				res.redirect("/homeAfterFormSubmission");
 			});
 		} else {
-			db.getEventModel().find().then((docs) => {
-				db.userLookup(req.session.user, function(userObj, err) {
-					res.render('home.ejs', {
-						input: {
-							events: docs,
-							user: req.session.user,
-							requestedHist: userObj.requestedHistory,
-							notifications: userObj.notificationHistory
-						}
-					});
-				});
-			});
+			res.redirect("/homeAfterFormSubmission");
 		}
 	});
 };
+
+var homeAfterFormSubmission = function(req, res) {
+	db.getEventModel().find().then((docs) => {
+		db.userLookup(req.session.user, function(userObj, err) {
+			res.render('home.ejs', {
+				input: {
+					events: docs,
+					user: req.session.user,
+					requestedHist: userObj.requestedHistory,
+					notifications: userObj.notificationHistory
+				}
+			});
+		});
+	});
+}
+
 var routes = {
 	getHome: getHome,
 	postRequestTransactionHistoryCharity: postRequestTransactionHistoryCharity,
@@ -579,7 +540,8 @@ var routes = {
 	getPrefAndInfo: getPrefAndInfo,
 	postPrefAndInfo: postPrefAndInfo,
 	getdonationStatus: getdonationStatus,
-	postMarkDonationAsRecieved: postMarkDonationAsRecieved
+	postMarkDonationAsRecieved: postMarkDonationAsRecieved,
+	home_after_form_submission: homeAfterFormSubmission
 };
 
 module.exports = routes;
