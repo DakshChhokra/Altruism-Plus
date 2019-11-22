@@ -52,8 +52,8 @@ function donorPref(charitypref) {
 }
 
 var getHome = function(req, res) {
-	// initiateDB();
-	// otherFunctionToTestDB();
+	initiateDB();
+	otherFunctionToTestDB();
 	res.render('otherHome.ejs');
 };
 
@@ -392,7 +392,7 @@ var createEvent = function(req, res) {
 		// throw error if any field is blank
 		var signUpErr = encodeURIComponent('One or more fields left blank.');
 		// res.redirect('/signup/?error=' + signUpErr);
-		res.redirect("/homeAfterFormSubmission");
+		res.redirect('/homeAfterFormSubmission');
 		return;
 	}
 
@@ -404,17 +404,17 @@ var createEvent = function(req, res) {
 			// event already exists in database
 			var evExists = encodeURIComponent('Event name ' + data1.name + ' already exists.');
 			// res.redirect('/signup/?error=' + evExists);
-			res.redirect("/homeAfterFormSubmission");
+			res.redirect('/homeAfterFormSubmission');
 		} else {
 			db.eventPut(eventName, eventOwner, eventNeed, eventLocation, eventDescription, function() {
-				res.redirect("/homeAfterFormSubmission");
+				res.redirect('/homeAfterFormSubmission');
 			});
 		}
 	});
 };
 
 var eventsPage = function(req, res) {
-	res.redirect("/homeAfterFormSubmission");
+	res.redirect('/homeAfterFormSubmission');
 };
 
 var sendNotification = function(req, res) {
@@ -425,7 +425,7 @@ var sendNotification = function(req, res) {
 	var eventOwner = array[2];
 	console.log(string);
 	db.addNotification(eventOwner, requester, eventName, function() {
-		res.redirect("/homeAfterFormSubmission");
+		res.redirect('/homeAfterFormSubmission');
 	});
 };
 
@@ -496,10 +496,10 @@ var confirmNotification = function(req, res) {
 	db.removeNotification(req.session.user, requesterName, eventName, result, function() {
 		if (result == 'yes') {
 			db.addBeneficiary(requesterName, eventName, function() {
-				res.redirect("/homeAfterFormSubmission");
+				res.redirect('/homeAfterFormSubmission');
 			});
 		} else {
-			res.redirect("/homeAfterFormSubmission");
+			res.redirect('/homeAfterFormSubmission');
 		}
 	});
 };
@@ -517,6 +517,80 @@ var homeAfterFormSubmission = function(req, res) {
 			});
 		});
 	});
+};
+
+var getAllCharities = function(req, res) {
+	getAllCharitiesHelper(res);
+};
+
+async function getAllCharitiesHelper(res) {
+	var list = await allCharities();
+	res.json({ list: list });
+}
+function allCharities() {
+	return db.CharityModel.find().exec();
+}
+
+var addDonor = function(req, res) {
+	addDonorHelper(req, res);
+};
+
+async function addDonorHelper(req, res) {
+	var AD = new db.DonorModel({
+		name: req.body.name,
+		password: req.body.password
+	});
+	var fuckKD = AD.save((err, doc) => {
+		if (err) {
+			console.log('ERROR!', err);
+			res.send({ status: 'FAILED' });
+		}
+	});
+
+	res.send({ status: 'SUCCESFUL' });
+}
+
+var getAllDonorsPath = function(req, res) {
+	getAllDonorsHelper(req, res);
+};
+
+async function getAllDonorsHelper(req, res) {
+	var allBigDs = await getAllDonorsMongoose();
+	res.json({ input: allBigDs });
+}
+
+function getAllDonorsMongoose() {
+	return db.DonorModel.find().exec();
+}
+
+var getRemoveDonor = function(req, res) {
+	getRemoveDonorHelper(req, res);
+};
+async function getRemoveDonorHelper(req, res) {
+	console.log(req.query.name);
+	const some = await db.DonorModel.deleteOne({ name: req.query.name }, (err, doc) => {
+		if (err) {
+			res.json({ status: 'shit failed yo' });
+		}
+		res.json({ status: 'shit worked my dude' });
+	});
+}
+
+var getallDonorsLink = function(req, res) {
+	getallDonorsHelper(res);
+};
+
+async function getallDonorsHelper(res) {
+	var allDonors = await getAllDonors();
+	res.json(allDonors);
+}
+
+var addImageForRoutes = function(req, res) {
+	addImageHelper(req, res);
+};
+
+async function addImageHelper(req, res) {
+	db.updatePhoto(req.body.name, req.body.photo);
 }
 
 var routes = {
@@ -541,7 +615,13 @@ var routes = {
 	postPrefAndInfo: postPrefAndInfo,
 	getdonationStatus: getdonationStatus,
 	postMarkDonationAsRecieved: postMarkDonationAsRecieved,
-	home_after_form_submission: homeAfterFormSubmission
+	home_after_form_submission: homeAfterFormSubmission,
+	getAllCharities: getAllCharities,
+	addDonor: addDonor,
+	getAllDonors: getAllDonorsPath,
+	getRemoveDonor: getRemoveDonor,
+	getallDonors: getallDonorsLink,
+	addImage: addImageForRoutes
 };
 
 module.exports = routes;

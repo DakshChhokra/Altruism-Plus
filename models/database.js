@@ -162,14 +162,12 @@ var add_beneficiary = function(beneficiary, eventName, route_callback) {
 		(err, doc) => {
 			if (err) {
 				console.error(err);
-			}
-			else {
+			} else {
 				route_callback();
 			}
 		}
 	);
 	console.log('updated beneficiaries for ' + eventName);
-
 };
 
 var remove_notification = function(eventOwner, requester, eventName, result, route_callback) {
@@ -180,12 +178,12 @@ var remove_notification = function(eventOwner, requester, eventName, result, rou
 			if (err) {
 				console.error(err);
 			} else {
-			route_callback();
+				route_callback();
 			}
 		}
 	);
 
-/*
+	/*
 	CharityModel.findOneAndUpdate({ name: requester }, { $pull: { requestedHistory: eventName } }, (err, doc) => {
 		if (err) {
 			console.error(err);
@@ -193,19 +191,20 @@ var remove_notification = function(eventOwner, requester, eventName, result, rou
 	});
 */
 	console.log('pulled notifications for ' + eventOwner);
-
 };
 
 var update_photo = function(userName, updatePhoto, route_callback) {
+	//console.log(updatePhoto);
 	DonorModel.findOneAndUpdate({ name: userName }, { photo: updatePhoto }, (err, doc) => {
 		if (err) {
 			console.error(err);
+		} else {
+			if (route_callback) {
+				route_callback();
+			}
 		}
 	});
-	console.log('updating photo for' + eventOwner);
-	if (route_callback) {
-		route_callback();
-	}
+	console.log('updating photo for' + userName);
 };
 
 var database = {

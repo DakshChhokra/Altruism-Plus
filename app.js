@@ -70,3 +70,17 @@ app.post('/eventspage', routes.events_page);
 app.post('/sendnotification', routes.send_notification);
 
 app.post('/confirmnotification', routes.confirm_notification);
+
+//Viggy
+
+app.post('/addDonor', routes.addDonor);
+
+app.get('/getAllDonors', routes.getAllDonors);
+
+app.get('/removeDonor', routes.getRemoveDonor);
+
+//Richard
+
+app.get('/allDonors', routes.getallDonors);
+
+app.post('/addImage', routes.addImage);
