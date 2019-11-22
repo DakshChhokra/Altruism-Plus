@@ -57,3 +57,6 @@ app.post('/createevent', routes.create_event);
 
 app.post('/eventspage', routes.events_page);
 
+app.post('/sendnotification', routes.send_notification);
+
+app.post('/confirmnotification', routes.confirm_notification);

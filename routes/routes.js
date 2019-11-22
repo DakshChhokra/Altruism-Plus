@@ -404,23 +404,71 @@ var createEvent = function(req, res) {
 			var evExists = encodeURIComponent('Event name ' + data1.name + ' already exists.');
 			res.redirect('/signup/?error=' + evExists);
 		} else {
-			db.eventPut(eventName, eventOwner, eventNeed, eventLocation, eventDescription);
-			db.getEventModel().find().then((docs) => {
-				res.render('home.ejs', { input: { events: docs } });
+			db.eventPut(eventName, eventOwner, eventNeed, eventLocation, eventDescription, function() {
+				db.getEventModel().find().then((docs) => {
+					db.userLookup(req.session.user, function(userObj, err) {
+						res.render('home.ejs', { input: {events: docs , user : req.session.user , requestedHist : userObj.requestedHistory, notifications : userObj.notificationHistory}});
+					})
+				});
 			});
 		}
 	});
 };
 
-
-
 var eventsPage = function(req, res) {
 	db.getEventModel().find().then((docs) => {
-		res.render('home.ejs', { input: { events: docs } });
+		db.userLookup(req.session.user, function(userObj, err) {
+			res.render('home.ejs', { input: {events: docs , user : req.session.user , requestedHist : userObj.requestedHistory, notifications : userObj.notificationHistory}});
+		})
 	});
 };
 
+var sendNotification = function(req, res) {
+	var string = req.body.info;
+	var array = string.split('*');
+	var requester = array[0];
+	var eventName = array[1];
+	var eventOwner = array[2];
+	console.log(string);
+	db.addNotification(eventOwner, requester, eventName, function() {
+		db.getEventModel().find().then((docs) => {
+			db.userLookup(req.session.user, function(userObj, err) {
+				res.render('home.ejs', { input: {events: docs , user : req.session.user , requestedHist : userObj.requestedHistory, notifications : userObj.notificationHistory}});
+			});
+		});
+    });
+};
 
+
+var confirmNotification = function(req, res) {
+	var string = req.body.result;
+	var array = string.split('*');
+	var eventName = array[0];
+	var result = array[1]
+	var requesterName = array[2];
+
+	console.log(string);
+
+	db.removeNotification(req.session.user, requesterName, eventName, function() {
+		if (result == "yes") {
+			db.addBeneficiary(requesterName, eventName, function() {
+				db.getEventModel().find().then((docs) => {
+					db.userLookup(req.session.user, function(userObj, err) {
+						res.render('home.ejs', { input: {events: docs , user : req.session.user , requestedHist : userObj.requestedHistory, notifications : userObj.notificationHistory}});
+					});
+				});
+	    	});
+		} else {
+			db.getEventModel().find().then((docs) => {
+				db.userLookup(req.session.user, function(userObj, err) {
+					res.render('home.ejs', { input: {events: docs , user : req.session.user, requestedHist : userObj.requestedHistory, notifications : userObj.notificationHistory}});
+				});
+			});
+		}
+    });
+
+
+}
 var routes = {
 	getHome: getHome,
 	postRequestTransactionHistoryCharity: postRequestTransactionHistoryCharity,
@@ -435,7 +483,9 @@ var routes = {
 	check_login: checkLogin,
 	clear: clear,
 	create_event: createEvent,
-	events_page: eventsPage
+	events_page: eventsPage,
+	send_notification: sendNotification,
+	confirm_notification: confirmNotification
 };
 
 module.exports = routes;

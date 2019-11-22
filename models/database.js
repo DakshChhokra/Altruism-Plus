@@ -16,6 +16,8 @@ var charitySchema = new Schema({
 	location: String,
 	description: String,
 	photo: String,
+	notificationHistory: [{eventName: String, requesterName: String}],
+	requestedHistory: [String],
 	transactionHistory: [ ObjectId ],
 	preferredDonors: [ ObjectId ]
 });
@@ -26,7 +28,7 @@ var eventSchema = new Schema({
 	need: String,
 	location: String,
 	description: String,
-	beneficiaries: [ String ]
+	beneficiaries: [{beneficiaryName : String}]
 });
 
 var resourceSchema = new Schema({
@@ -86,7 +88,7 @@ var user_lookup = function(username, route_callback) {
 				route_callback(res, null);
 			}
 		}
-		console.log('document lookup');
+		//console.log('document lookup');
 	});
 };
 
@@ -105,6 +107,7 @@ var event_put = function(eventName, owner, need, location, description, route_ca
 	});
 	eventOne.save();
 	console.log('1 event inserted');
+	route_callback();
 };
 
 var event_lookup = function(eventName, route_callback) {
@@ -121,13 +124,54 @@ var event_lookup = function(eventName, route_callback) {
 	});
 };
 
-var event_return_all = function() {
-	return EventModel.find().lean().exec();
-};
-
 var get_event_model = function() {
 	return EventModel;
 };
+
+
+var add_notification = function(eventOwner, requester, eventName, route_callback) {
+	CharityModel.findOneAndUpdate({name : eventOwner}, {$push : {notificationHistory : {"eventName" : eventName, "requesterName" : requester}}}, (err, doc) => {
+			if (err) { console.error(err); }
+			});
+	CharityModel.findOneAndUpdate({name : requester}, {$push : {requestedHistory : eventName}}, (err, doc) => {
+			if (err) { console.error(err); }
+			});
+	console.log("updated notifications for " + eventOwner);
+	route_callback();
+}
+
+var add_beneficiary = function(beneficiary, eventName, route_callback) {
+	EventModel.findOneAndUpdate({name : eventName}, {$push : {beneficiaries : {"beneficiaryName" : beneficiary}}},
+		(err, doc) => {
+			if (err) { console.error(err); }
+			});
+	console.log("updated beneficiaries for " + eventName);
+	route_callback();
+}
+
+var remove_notification = function(eventOwner, requester, eventName, route_callback) {
+	CharityModel.findOneAndUpdate({name : eventOwner}, {$pull : {notificationHistory : {"eventName" : eventName, "requesterName" : requester}}},
+		(err, doc) => {
+			if (err) { console.error(err); }
+			});
+	CharityModel.findOneAndUpdate({name : requester}, {$pull : {requestedHistory : eventName}}, (err, doc) => {
+		if (err) { console.error(err); }
+		});
+	console.log("pulled notifications for " + eventOwner);
+	route_callback();
+}
+
+var update_photo = function(userName, updatePhoto, route_callback) {
+	DonorModel.findOneAndUpdate({name : userName}, { photo : updatePhoto},
+		(err, doc) => {
+			if (err) { console.error(err); }
+			});
+	console.log("updating photo for" + eventOwner);
+	if(route_callback) {
+		route_callback();
+	}
+}
+
 
 var database = {
 	userPut: user_put,
@@ -135,8 +179,11 @@ var database = {
 	userLookup: user_lookup,
 	eventPut: event_put,
 	eventLookup: event_lookup,
-	eventReturnAll: event_return_all,
-	getEventModel: get_event_model
+	getEventModel: get_event_model,
+	addNotification: add_notification,
+	removeNotification: remove_notification,
+	addBeneficiary: add_beneficiary,
+	updatePhoto: update_photo
 };
 
 exports.CharityModel = CharityModel;

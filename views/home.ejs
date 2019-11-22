@@ -1,14 +1,32 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
-    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
-    <link href="https://fonts.googleapis.com/css?family=Lobster" rel="stylesheet">
-    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
-
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
+
+.button1 {
+ background-color: #bbb;
+ padding: .5em;
+ -moz-border-radius: 5px;
+ -webkit-border-radius: 5px;
+ border-radius: 6px;
+ text-decoration: none;
+ border: none;
+}
+
+.button1:hover {
+ border: none;
+ background: orange;
+ box-shadow: 0px 0px 1px #777;
+}
+
 body {font-family: Arial, Helvetica, sans-serif;}
 * {box-sizing: border-box;}
 .eventEntry {
@@ -44,7 +62,11 @@ body {font-family: Arial, Helvetica, sans-serif;}
 }
 /* Add styles to the form container */
 .form-container {
-  max-width: 300px;
+      margin:auto;
+    position: fixed;
+    top: 30px;
+    left: 600px;
+  max-width: 400px;
   padding: 10px;
   background-color: white;
   box-shadow: 0 0 0 100vmax rgba(0,0,0,.3);
@@ -67,7 +89,7 @@ body {font-family: Arial, Helvetica, sans-serif;}
 /* Set a style for the submit/login button */
 .form-container .btn {
   background-color: #4CAF50;
-  color: white;
+  color: blue;
   padding: 16px 20px;
   border: none;
   cursor: pointer;
@@ -89,30 +111,87 @@ body {font-family: Arial, Helvetica, sans-serif;}
 <body>
 
 <div class="jumbotron text-center">
-    <h1>CIS350 Project</h1>
+    <h1>CIS350 Project: Welcome <%= input.user%>!</h1>
 </div>
 
 <div class="row">
-    <div class="col-sm-8">
-        <h2>My Events</h2>
-        <p>Click on the button at the bottom of this page to open the login form.</p>
-        <o1>
-            <% input.events.forEach(function (e) { %>
-            <form action="/createevent" class="eventEntry" form method="post">
-            <h1> <%= e.name %> </h1>
-            <button type="submit" class="btn">Create Event!</button>
-            <button type="button" class="btn cancel" onclick="closeForm()">Close Form</button>
+  <div class="col-sm-8">
+    <div class="container mt-3">
+      <h2>My Events</h2>
+      <p>These are events that you've created</p>
+      <u1>
+        <% input.events.forEach(function (e) { %>
+          <% if (input.user == e.owner) { %>
+            <div class="media border p-3">
+              <div class="media-body">
+                <h4><b><%= e.name %></b> <small><i></i></small></h4>
+                <p><b>Item Being Donated: </b><%= e.need %> </p>
+                <p><b>Location: </b><%= e.location %> </p>
+                <p><b>Description: </b><%= e.description %> </p>
+                <p><b>Beneficiaries: </b>
+                <%e.beneficiaries.forEach(function (b) {%>
+                  <%=b.beneficiaryName + "   "%>
+                <%})%>
+                </p>
+              </div>
+            </div>
+          <%}%>
+        <% }) %>
+      </u1>
+    </div>
+
+    <div class="container mt-3">
+      <h2>Other Events</h2>
+      <p>These are other events going on right now. Feel free to join em!</p>
+      <u1>
+        <% input.events.forEach(function (e) { %>
+          <% if (input.user != e.owner) { %>
+            <div class="media border p-3" border-width: 2px>
+              <div class="media-body">
+                <h4><b><%= e.name %></b> <small><i>Event Owner: <%= e.owner %></i></small></h4>
+                <p><b>Item Being Donated: </b><%= e.need %> </p>
+                <p><b>Location: </b><%= e.location %> </p>
+                <p><b>Description: </b><%= e.description %> </p>
+                <p><b>Beneficiaries: </b>
+                <%e.beneficiaries.forEach(function (b) {%>
+                  <%=b.beneficiaryName + "   "%>
+                <%})%>
+                </p>
+                <%if (!input.requestedHist.includes(e.name)) {%>
+                  <form action="/sendnotification" form method="post">
+                    <button class="button1" name='info' type="submit" value="<%=input.user + '*' +  e.name + '*' + e.owner %>" class="btn">Ask to Join</button>
+                  </form>
+                <%}%>
+              </div>
+            </div>
+          <%}%>
+        <% }) %>
+      </u1>
+    </div>
+  </div>
+
+<div class="col--sm-4">
+ <h2>Notifications</h2>
+  <o1>
+    <% input.notifications.forEach(function (e) { %>
+      <div class="media border p-3" border-width: 2px;>
+        <div class="media-body">
+        <%= e.requesterName %> is requesting to join your event <%= e.eventName %>
+
+          <form action="/confirmnotification" form method="post">
+
+            <div class="btn-group">
+              <button class="button1" name='result' type="submit" value="<%=e.eventName + '*' + 'yes' + '*' + e.requesterName %>" class="btn">approve</button>
+              <button class="button1" name='result' type="submit" value="<%=e.eventName + '*' + 'no' + '*' + e.requesterName %>" class="btn">reject</button>
+            </div>
+
           </form>
-            <% }) %>
-        </o1>
-
-        <h2>Other Events</h2>
-    </div>
-    <div class="col--sm-4">
-    </div>
+        </div>
+      </div>
+    <% }) %>
+    </o1>
+  </div>
 </div>
-
-
 
 
 <button class="open-button" onclick="openForm()">Create an Event</button>
@@ -149,8 +228,6 @@ function closeForm() {
   document.getElementById("myForm").style.display = "none";
 }
 </script>
-
-
 
 </body>
 </html>
