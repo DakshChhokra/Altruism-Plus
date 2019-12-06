@@ -21,11 +21,11 @@
 <body>
     <div class="container-fluid">
         <div class="jumbotron">
-            <h1 class="text-success">View All Available Items up for Donation</h1>
+            <h1 class="text-success">View All Available Items from your Preferred Donors</h1>
         </div>
         <div class="container">
 
-            <% input.allAvailableResources.forEach(function (el) { %>
+            <% input.resources.forEach(function (el) { %>
                 <div class="row">
                         <div class="col-sm-10">
                             <div class="media border p-3">
@@ -38,7 +38,11 @@
                             <p><b>Status of Resource: </b> <%=el.status%></p>
                             <% if (el && el.status == 'Claimed') { %>
                                 <form action="/donationStatus" method="GET">
-                                    <button id="button" class="btn btn-danger btn-lg" disabled>Resource is Claimed </button>
+                                    <button id="button" class="btn btn-warning btn-lg" disabled>Resource is Claimed</button>
+                                </form>
+                            <% } else if (el && el.status == 'Delivered') { %>
+                                <form action="/donationStatus" method="GET">
+                                    <button id="button" class="btn btn-danger btn-lg" disabled>Resource is Delivered</button>
                                 </form>
                             <% } else { %>
                                 <form action="/markDonationAsClaimed" method="POST">

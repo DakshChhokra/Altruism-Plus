@@ -51,6 +51,10 @@ app.post('/markDonationAsRecieved', routes.postMarkDonationAsRecieved);
 
 app.get('/viewAllDonations', routes.getViewAllDonations);
 
+app.post('/markDonationAsClaimed', routes.postmarkDonationAsClaimed);
+
+app.get('/viewDonationsFromPreferredDonor', routes.getViewDonationsFromPreferredDonor);
+
 //Arthur
 
 app.get('/', routes.get_login);

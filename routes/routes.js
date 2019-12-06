@@ -52,11 +52,15 @@ function donorPref(charitypref) {
 }
 
 var getHome = function(req, res) {
-	// initiateDB();
-	// otherFunctionToTestDB();
-	// moreTestingCrapInThisProductionWorthApplication();
-	res.render('otherHome.ejs');
+	getHomeHelper(req, res);
 };
+
+async function getHomeHelper(req, res) {
+	await initiateDB();
+	// otherFunctionToTestDB();
+	await moreTestingCrapInThisProductionWorthApplication();
+	res.render('otherHome.ejs');
+}
 
 async function otherFunctionToTestDB() {
 	var getDaksh = await getCharity('daksh');
@@ -85,9 +89,11 @@ async function moreTestingCrapInThisProductionWorthApplication() {
 		count: 20,
 		category: 'Electronics',
 		description: '20 Non Smart Phones',
-		status: 'Offered',
+		status: 'Delivered',
 		photo: '',
-		promoted: true
+		promoted: true,
+		sender: 'Jules Saladana',
+		reciever: 'daksh'
 	});
 	var resourceConf = resource.save();
 
@@ -98,9 +104,38 @@ async function moreTestingCrapInThisProductionWorthApplication() {
 		description: '1 Gold Bar which completely pure, and totally not a scam. Believe me.',
 		status: 'Claimed',
 		photo: '',
-		promoted: false
+		promoted: false,
+		sender: 'Jules Saladana',
+		reciever: 'daksh'
 	});
 	var resourceDuoConf = resourceDuo.save();
+	var getDaksh = await getCharity('daksh');
+	var getJules = await getDonor('Jules Saladana');
+	var t1 = {
+		from: 'Jules Saladana',
+		to: 'daksh',
+		resource: '20DumbPhones',
+		timeStamp: new Date().toISOString()
+	};
+
+	var t2 = {
+		from: 'Jules Saladana',
+		to: 'daksh',
+		resource: '1GoldBar',
+		timeStamp: new Date().toISOString()
+	};
+	console.log('##############################');
+	console.log(getJules.transactionHistory);
+	console.log('##############################');
+	getDaksh.transactionHistory.push(t1);
+	getDaksh.transactionHistory.push(t2);
+	getJules.transactionHistory.push(t1);
+	getJules.transactionHistory.push(t2);
+
+	var stat = await getDaksh.save();
+	var stat2 = await getJules.save();
+
+	console.log('sneaky ops done');
 }
 var postRequestTransactionHistoryCharity = function(req, res) {
 	var charityName = req.body.charityName;
@@ -211,31 +246,6 @@ async function getAllCharitiesAndDonors(res) {
 }
 
 async function initiateDB() {
-	var transaction1 = {
-		from: 'Joe Schmoe',
-		to: 'McCharity Charity',
-		resource: '10Blankets',
-		timeStamp: new Date().toISOString()
-	};
-	var transaction2 = {
-		from: 'Joe Schmoe',
-		to: 'McCharity Charity',
-		resource: '3Pants',
-		timeStamp: new Date().toISOString()
-	};
-	var transaction3 = {
-		from: 'Jules Saladana',
-		to: 'Damn',
-		resource: '3Pants',
-		timeStamp: new Date().toISOString()
-	};
-	var transaction4 = {
-		from: 'Jules Saladana',
-		to: 'Damn',
-		resource: '10Blankets',
-		timeStamp: new Date().toISOString()
-	};
-
 	const charityOne = new db.CharityModel({
 		name: 'McCharity Charity',
 		password: '1231231l31.madso12-o31=20o31',
@@ -243,19 +253,19 @@ async function initiateDB() {
 		location: 'Gibraltar',
 		description: 'itts 2010. rage comics are back bby',
 		photo: '',
-		transactionHistory: [ transaction1, transaction2 ],
+		transactionHistory: [],
 		preferredDonors: []
 	});
 	var c1 = await charityOne.save();
 
 	const charityTwo = new db.CharityModel({
-		name: 'Damn',
+		name: 'Literal Hearts For Humanity',
 		password: '1231231l31.madso12-o31=20o31',
 		need: 'Food',
 		location: 'Midway Islands',
 		description: 'nah, there is no description',
 		photo: '',
-		transactionHistory: [ transaction3, transaction4 ],
+		transactionHistory: [],
 		preferredDonors: []
 	});
 
@@ -266,7 +276,7 @@ async function initiateDB() {
 		password: '7821391b92jklsa',
 		location: 'Philadelphia',
 		preferredCategory: 'Blankets',
-		transactionHistory: [ transaction1, transaction2 ],
+		transactionHistory: [],
 		photo: '',
 		description: 'Sells furniture',
 		friends: [],
@@ -280,7 +290,7 @@ async function initiateDB() {
 		password: '7821391b92jklsa',
 		location: 'New York',
 		preferredCategory: 'Blankets',
-		transactionHistory: [ transaction3, transaction4 ],
+		transactionHistory: [],
 		photo: '',
 		description: 'Fixes electronics',
 		friends: [],
@@ -294,9 +304,11 @@ async function initiateDB() {
 		count: 10,
 		category: 'Essentials',
 		description: 'Non threadbare blankets',
-		status: 'Delivered',
+		status: 'Offered',
 		photo: '',
-		promoted: false
+		promoted: false,
+		sender: 'Joe Schmoe',
+		reciever: ''
 	});
 	var r1 = resourceOne.save();
 
@@ -305,9 +317,11 @@ async function initiateDB() {
 		count: 3,
 		category: 'Clothing',
 		description: 'Denim Pants',
-		status: 'Claimed',
+		status: 'Offered',
 		photo: '',
-		promoted: true
+		promoted: true,
+		sender: 'Jules Saladana',
+		reciever: ''
 	});
 	var r2 = resourceTwo.save();
 }
@@ -473,6 +487,17 @@ async function postPrefAndInfoHelper(req, res) {
 	if (req.body.location.length > 0) {
 		charityObj.location = req.body.location;
 	}
+
+	if (req.body.prefDonor.length > 0) {
+		if (!charityObj.preferredDonors.includes(req.body.prefDonor)) {
+			charityObj.preferredDonors.push(req.body.prefDonor);
+		}
+	}
+	if (req.body.prefDonorRemove.length > 0) {
+		if (charityObj.preferredDonors.includes(req.body.prefDonorRemove)) {
+			charityObj.preferredDonors.splice(charityObj.preferredDonors.indexOf(req.body.prefDonorRemove), 1);
+		}
+	}
 	var co = await charityObj.save();
 	res.render('landingPage.ejs');
 }
@@ -624,12 +649,62 @@ var getViewAllDonations = function(req, res) {
 
 async function getAllResources(req, res) {
 	var allResources = await getAllResourcesThree();
-	// res.send(allResources);
 	res.render('allDonations.ejs', { input: { allAvailableResources: allResources } });
 }
 
 function getAllResourcesThree() {
 	return db.ResourceModel.find({ $or: [ { status: 'Offered' }, { status: 'Claimed' } ] }).exec();
+}
+
+var postmarkDonationAsClaimed = function(req, res) {
+	console.log('req.body.result', req.body.result);
+	postmarkDonationAsClaimedHelper(req, res);
+};
+
+async function postmarkDonationAsClaimedHelper(req, res) {
+	var resource = await getResource(req.body.result);
+	console.log('resource', resource);
+	resource.status = 'Claimed';
+	resource.reciever = req.session.user;
+	var afterUpdate = await resource.save();
+	var currentTransaction = {
+		from: resource.sender,
+		to: req.session.user,
+		resource: resource.name,
+		timeStamp: new Date().toISOString()
+	};
+	var getCurrentCharity = await getCharity(req.session.user);
+	getCurrentCharity.transactionHistory.push(currentTransaction);
+	var stat = await getCurrentCharity.save();
+
+	var currentDonor = await getDonor(resource.sender);
+	currentDonor.transactionHistory.push(currentTransaction);
+	var notification = { charityName: req.session.user, resourceName: resource.name };
+	currentDonor.notificationHistory.push(notification);
+
+	var statTwo = await currentDonor.save();
+
+	res.render('landingPage.ejs');
+}
+
+var getViewDonationsFromPreferredDonor = function(req, res) {
+	getViewDonationsFromPreferredDonorHelper(req, res);
+};
+
+async function getViewDonationsFromPreferredDonorHelper(req, res) {
+	var currentCharity = await getCharity(req.session.user);
+	var resourcesFromPreferredDonors = [];
+	console.log(currentCharity);
+	for (var i = 0; i < currentCharity.preferredDonors.length; i++) {
+		var actualResource = await getAllResourcesForPreferredDonors(currentCharity.preferredDonors[i]);
+		resourcesFromPreferredDonors = resourcesFromPreferredDonors.concat(actualResource);
+	}
+	console.log('The list is: ', resourcesFromPreferredDonors);
+	res.render('preferredDonors.ejs', { input: { resources: resourcesFromPreferredDonors } });
+}
+
+async function getAllResourcesForPreferredDonors(preferredDonor) {
+	return db.ResourceModel.find({ sender: preferredDonor }).exec();
 }
 
 var routes = {
@@ -661,7 +736,9 @@ var routes = {
 	getRemoveDonor: getRemoveDonor,
 	getallDonors: getallDonorsLink,
 	addImage: addImageForRoutes,
-	getViewAllDonations: getViewAllDonations
+	getViewAllDonations: getViewAllDonations,
+	postmarkDonationAsClaimed: postmarkDonationAsClaimed,
+	getViewDonationsFromPreferredDonor: getViewDonationsFromPreferredDonor
 };
 
 module.exports = routes;
