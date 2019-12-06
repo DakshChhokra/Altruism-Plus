@@ -42,9 +42,11 @@ var resourceSchema = new Schema({
 	count: Number,
 	category: String,
 	description: String,
-	status: String,
+	status: String, //Delivered, Offered, Claimed
 	photo: String,
-	promoted: Boolean
+	promoted: Boolean,
+	sender: String,
+	reciever: String
 });
 
 var donorSchema = new Schema({
@@ -63,7 +65,8 @@ var donorSchema = new Schema({
 	photo: String,
 	description: String,
 	friends: [ String ],
-	preferredCharities: [ String ]
+	preferredCharities: [ String ],
+	notificationHistory: [ { charityName: String, resourceName: String } ]
 });
 
 var CharityModel = mongoose.model('CharityModel', charitySchema);

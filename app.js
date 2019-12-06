@@ -49,6 +49,8 @@ app.get('/donationStatus', routes.getdonationStatus);
 
 app.post('/markDonationAsRecieved', routes.postMarkDonationAsRecieved);
 
+app.get('/viewAllDonations', routes.getViewAllDonations);
+
 //Arthur
 
 app.get('/', routes.get_login);

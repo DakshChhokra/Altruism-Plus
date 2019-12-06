@@ -54,6 +54,7 @@ function donorPref(charitypref) {
 var getHome = function(req, res) {
 	// initiateDB();
 	// otherFunctionToTestDB();
+	// moreTestingCrapInThisProductionWorthApplication();
 	res.render('otherHome.ejs');
 };
 
@@ -76,6 +77,30 @@ async function otherFunctionToTestDB() {
 	getDaksh.transactionHistory.push(t2);
 	var stat = await getDaksh.save();
 	console.log('sneaky ops done');
+}
+
+async function moreTestingCrapInThisProductionWorthApplication() {
+	const resource = new db.ResourceModel({
+		name: '20DumbPhones',
+		count: 20,
+		category: 'Electronics',
+		description: '20 Non Smart Phones',
+		status: 'Offered',
+		photo: '',
+		promoted: true
+	});
+	var resourceConf = resource.save();
+
+	const resourceDuo = new db.ResourceModel({
+		name: '1GoldBar',
+		count: 1,
+		category: 'Valuabled',
+		description: '1 Gold Bar which completely pure, and totally not a scam. Believe me.',
+		status: 'Claimed',
+		photo: '',
+		promoted: false
+	});
+	var resourceDuoConf = resourceDuo.save();
 }
 var postRequestTransactionHistoryCharity = function(req, res) {
 	var charityName = req.body.charityName;
@@ -280,7 +305,7 @@ async function initiateDB() {
 		count: 3,
 		category: 'Clothing',
 		description: 'Denim Pants',
-		status: 'Promised',
+		status: 'Claimed',
 		photo: '',
 		promoted: true
 	});
@@ -593,6 +618,20 @@ async function addImageHelper(req, res) {
 	db.updatePhoto(req.body.name, req.body.photo);
 }
 
+var getViewAllDonations = function(req, res) {
+	getAllResources(req, res);
+};
+
+async function getAllResources(req, res) {
+	var allResources = await getAllResourcesThree();
+	// res.send(allResources);
+	res.render('allDonations.ejs', { input: { allAvailableResources: allResources } });
+}
+
+function getAllResourcesThree() {
+	return db.ResourceModel.find({ $or: [ { status: 'Offered' }, { status: 'Claimed' } ] }).exec();
+}
+
 var routes = {
 	getHome: getHome,
 	postRequestTransactionHistoryCharity: postRequestTransactionHistoryCharity,
@@ -621,7 +660,8 @@ var routes = {
 	getAllDonors: getAllDonorsPath,
 	getRemoveDonor: getRemoveDonor,
 	getallDonors: getallDonorsLink,
-	addImage: addImageForRoutes
+	addImage: addImageForRoutes,
+	getViewAllDonations: getViewAllDonations
 };
 
 module.exports = routes;
