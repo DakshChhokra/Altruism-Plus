@@ -92,3 +92,9 @@ app.get('/allDonors', routes.getallDonors);
 app.post('/addImage', routes.addImage);
 
 app.get('/allCharitiesRichard', routes.getAllCharitiesRichard);
+
+app.get('/getDollarAmountDonatedToACharity', routes.getDollarAmountDonatedToACharity);
+
+app.get('/getDollarAmountTransactionHistory', routes.getDollarAmountTransactionHistory);
+
+app.post('/donateMoneyToCharity', routes.postDonateMoneyToCharity);

@@ -25,7 +25,8 @@ var charitySchema = new Schema({
 			timeStamp: String
 		}
 	],
-	preferredDonors: [ String ]
+	preferredDonors: [ String ],
+	donatedDollarAmount: Number
 });
 
 var eventSchema = new Schema({
@@ -66,7 +67,8 @@ var donorSchema = new Schema({
 	description: String,
 	friends: [ String ],
 	preferredCharities: [ String ],
-	notificationHistory: [ { charityName: String, resourceName: String } ]
+	notificationHistory: [ { charityName: String, resourceName: String } ],
+	monetaryTransactionHistory: [ [ String, String, Number ] ]
 });
 
 var CharityModel = mongoose.model('CharityModel', charitySchema);

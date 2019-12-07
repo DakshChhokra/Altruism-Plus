@@ -722,6 +722,48 @@ function getAllCharitiesRichardMongoose() {
 	return db.CharityModel.find().exec();
 }
 
+var getDollarAmountDonatedToACharity = function(req, res) {
+	getDollarAmountDonatedToACharityHelper(req, res);
+};
+
+async function getDollarAmountDonatedToACharity(req, res) {
+	var charityObject = await getCharity(req.query.charityName);
+	res.json({ amount: charityObject.donatedDollarAmount });
+}
+
+var getDollarAmountTransactionHistory = function(req, res) {
+	getDollarAmountTransactionHistoryHelper(req, res);
+};
+
+async function getDollarAmountTransactionHistoryHelper(req, res) {
+	console.log(req.query.name);
+	var donorVariable = await getDonor(req.query.name);
+	console.log(donorVariable);
+	res.json(donorVariable.monetaryTransactionHistory);
+}
+
+var postDonateMoneyToCharity = function(req, res) {
+	postDonateMoneyToCharityHelper(req, res);
+};
+
+async function postDonateMoneyToCharityHelper(req, res) {
+	console.log('BODY', req.body);
+	var currentDonationArray = [ req.body.charityName, req.body.donorName, req.body.dollarAmount ];
+
+	console.log('Incoming Info: ', currentDonationArray);
+
+	var donorObjectToUpdate = await getDonor(req.body.donorName);
+	donorObjectToUpdate.monetaryTransactionHistory.push(currentDonationArray);
+	var donorStatus = await donorObjectToUpdate.save();
+
+	var charityObjectToUpdate = await getCharity(req.body.charityName);
+	var newAmount = charityObjectToUpdate.donatedDollarAmount + req.body.dollarAmount;
+	charityObjectToUpdate.donatedDollarAmount = newAmount;
+	var charityStatus = await charityObjectToUpdate.save();
+
+	res.send({ status: 'Success!' });
+}
+
 var routes = {
 	getHome: getHome,
 	postRequestTransactionHistoryCharity: postRequestTransactionHistoryCharity,
@@ -754,7 +796,10 @@ var routes = {
 	getViewAllDonations: getViewAllDonations,
 	postmarkDonationAsClaimed: postmarkDonationAsClaimed,
 	getViewDonationsFromPreferredDonor: getViewDonationsFromPreferredDonor,
-	getAllCharitiesRichard: getAllCharitiesRichard
+	getAllCharitiesRichard: getAllCharitiesRichard,
+	getDollarAmountDonatedToACharity: getDollarAmountDonatedToACharity,
+	getDollarAmountTransactionHistory: getDollarAmountTransactionHistory,
+	postDonateMoneyToCharity: postDonateMoneyToCharity
 };
 
 module.exports = routes;
