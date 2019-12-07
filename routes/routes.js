@@ -254,7 +254,8 @@ async function initiateDB() {
 		description: 'itts 2010. rage comics are back bby',
 		photo: '',
 		transactionHistory: [],
-		preferredDonors: []
+		preferredDonors: [],
+		donatedDollarAmount: 1000
 	});
 	var c1 = await charityOne.save();
 
@@ -266,7 +267,8 @@ async function initiateDB() {
 		description: 'nah, there is no description',
 		photo: '',
 		transactionHistory: [],
-		preferredDonors: []
+		preferredDonors: [],
+		donatedDollarAmount: 2000
 	});
 
 	var c2 = await charityTwo.save();
@@ -280,7 +282,8 @@ async function initiateDB() {
 		photo: '',
 		description: 'Sells furniture',
 		friends: [],
-		preferredCharities: []
+		preferredCharities: [],
+		monetaryTransactionHistory: [ [ 'Literal Hearts For Humanity', 'Joe Schmoe', 2000 ] ]
 	});
 
 	var d1 = donorOne.save();
@@ -294,7 +297,8 @@ async function initiateDB() {
 		photo: '',
 		description: 'Fixes electronics',
 		friends: [],
-		preferredCharities: []
+		preferredCharities: [],
+		monetaryTransactionHistory: [ [ 'McCharity Charity', 'Jules Saladana', 1000 ] ]
 	});
 
 	var d2 = donorTwo.save();
@@ -726,7 +730,7 @@ var getDollarAmountDonatedToACharity = function(req, res) {
 	getDollarAmountDonatedToACharityHelper(req, res);
 };
 
-async function getDollarAmountDonatedToACharity(req, res) {
+async function getDollarAmountDonatedToACharityHelper(req, res) {
 	var charityObject = await getCharity(req.query.charityName);
 	res.json({ amount: charityObject.donatedDollarAmount });
 }
@@ -737,7 +741,7 @@ var getDollarAmountTransactionHistory = function(req, res) {
 
 async function getDollarAmountTransactionHistoryHelper(req, res) {
 	console.log(req.query.name);
-	var donorVariable = await getDonor(req.query.name);
+	var donorVariable = await getDonor(req.query.donorName);
 	console.log(donorVariable);
 	res.json(donorVariable.monetaryTransactionHistory);
 }
