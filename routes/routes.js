@@ -707,6 +707,21 @@ async function getAllResourcesForPreferredDonors(preferredDonor) {
 	return db.ResourceModel.find({ sender: preferredDonor }).exec();
 }
 
+var getAllCharitiesRichard = function(req, res) {
+	// res.send('WHAT!!!');
+	getAllCharitiesHelperRichard(res);
+};
+
+async function getAllCharitiesHelperRichard(res) {
+	var allCharitiesVariable = await getAllCharitiesRichardMongoose();
+	console.log(allCharitiesVariable);
+	res.json(allCharitiesVariable);
+}
+
+function getAllCharitiesRichardMongoose() {
+	return db.CharityModel.find().exec();
+}
+
 var routes = {
 	getHome: getHome,
 	postRequestTransactionHistoryCharity: postRequestTransactionHistoryCharity,
@@ -738,7 +753,8 @@ var routes = {
 	addImage: addImageForRoutes,
 	getViewAllDonations: getViewAllDonations,
 	postmarkDonationAsClaimed: postmarkDonationAsClaimed,
-	getViewDonationsFromPreferredDonor: getViewDonationsFromPreferredDonor
+	getViewDonationsFromPreferredDonor: getViewDonationsFromPreferredDonor,
+	getAllCharitiesRichard: getAllCharitiesRichard
 };
 
 module.exports = routes;

@@ -90,3 +90,5 @@ app.get('/removeDonor', routes.getRemoveDonor);
 app.get('/allDonors', routes.getallDonors);
 
 app.post('/addImage', routes.addImage);
+
+app.get('/allCharitiesRichard', routes.getAllCharitiesRichard);
