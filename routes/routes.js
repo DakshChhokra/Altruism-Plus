@@ -752,7 +752,10 @@ var postDonateMoneyToCharity = function(req, res) {
 
 async function postDonateMoneyToCharityHelper(req, res) {
 	console.log('BODY', req.body);
-	var currentDonationArray = [ req.body.charityName, req.body.donorName, req.body.dollarAmount ];
+	var charityName = req.body.charityName;
+	var donorName = req.body.donorName;
+	var dollarAmount = req.body.dollarAmount;
+	var currentDonationArray = [ charityName, donorName, dollarAmount ];
 
 	console.log('Incoming Info: ', currentDonationArray);
 
@@ -761,7 +764,11 @@ async function postDonateMoneyToCharityHelper(req, res) {
 	var donorStatus = await donorObjectToUpdate.save();
 
 	var charityObjectToUpdate = await getCharity(req.body.charityName);
-	var newAmount = charityObjectToUpdate.donatedDollarAmount + req.body.dollarAmount;
+
+	console.log(charityObjectToUpdate);
+	console.log('Stuff stored in charity Model is: ', charityObjectToUpdate.donatedDollarAmount);
+
+	var newAmount = parseInt(charityObjectToUpdate.donatedDollarAmount, 10) + parseInt(dollarAmount, 10);
 	charityObjectToUpdate.donatedDollarAmount = newAmount;
 	var charityStatus = await charityObjectToUpdate.save();
 

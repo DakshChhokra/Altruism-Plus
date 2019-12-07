@@ -83,7 +83,12 @@ var user_put = function(username, hash, need, location, description, route_callb
 		password: hash,
 		need: need,
 		location: location,
-		description: description
+		description: description,
+		donatedDollarAmount: 0,
+		notificationHistory: [],
+		transactionHistory: [],
+		requestedHistory: [],
+		preferredDonors: []
 	});
 	charityOne.save();
 	//console.log('1 charity inserted');
