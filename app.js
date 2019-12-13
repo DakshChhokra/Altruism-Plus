@@ -98,3 +98,5 @@ app.get('/getDollarAmountDonatedToACharity', routes.getDollarAmountDonatedToACha
 app.get('/getDollarAmountTransactionHistory', routes.getDollarAmountTransactionHistory);
 
 app.post('/donateMoneyToCharity', routes.postDonateMoneyToCharity);
+
+app.post('/sendMessageToCharity', routes.postSendMessageToCharity);

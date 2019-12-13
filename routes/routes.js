@@ -775,6 +775,26 @@ async function postDonateMoneyToCharityHelper(req, res) {
 	res.send({ status: 'Success!' });
 }
 
+var postSendMessageToCharity = function(req, res) {
+	postSendMessageToCharityHelper(req, res);
+};
+
+async function postSendMessageToCharityHelper(req, res) {
+	console.log('BODY', req.body);
+	var charityName = req.body.charityName;
+	var donorName = req.body.donorName;
+	var message = req.body.message;
+	var currentMessageArray = [ charityName, donorName, message ];
+
+	console.log('Incoming Info: ', currentMessageArray);
+
+	var charityObjectToUpdate = await getCharity(req.body.charityName);
+	charityObjectToUpdate.messageHistory.push(currentMessageArray);
+	var charityMessageStatus = await charityObjectToUpdate.save();
+
+	res.send({ status: 'Success!' });
+}
+
 var routes = {
 	getHome: getHome,
 	postRequestTransactionHistoryCharity: postRequestTransactionHistoryCharity,
@@ -810,7 +830,8 @@ var routes = {
 	getAllCharitiesRichard: getAllCharitiesRichard,
 	getDollarAmountDonatedToACharity: getDollarAmountDonatedToACharity,
 	getDollarAmountTransactionHistory: getDollarAmountTransactionHistory,
-	postDonateMoneyToCharity: postDonateMoneyToCharity
+	postDonateMoneyToCharity: postDonateMoneyToCharity,
+	postSendMessageToCharity: postSendMessageToCharity
 };
 
 module.exports = routes;

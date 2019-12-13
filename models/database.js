@@ -26,7 +26,8 @@ var charitySchema = new Schema({
 		}
 	],
 	preferredDonors: [ String ],
-	donatedDollarAmount: Number
+	donatedDollarAmount: Number,
+	messageHistory: [ [ String, String, String ] ]
 });
 
 var eventSchema = new Schema({
